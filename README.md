@@ -11,3 +11,6 @@ R learning repository
 [Financial Transactions Dataset: Analytics](https://www.kaggle.com/datasets/computingvictor/transactions-fraud-datasets)
 
 [Titanic](https://www.kaggle.com/datasets/hesh97/titanicdataset-traincsv)
+
+
+https://github.com/caglarmert/Learning-R
