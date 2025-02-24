@@ -1,0 +1,204 @@
+---
+title: "R Notebook"
+output:
+  pdf_document: default
+  html_notebook: default
+---
+
+# Giriş
+
+**A Bankası, uygun müşterilere Kredi Kartları verir.** Banka, uygunluk, limit ve faiz oranı atamasına karar vermek için gelişmiş veri bilimi yöntemleri kullanır. Bu yöntemler erken risk yönetimini sağlamak ve karlılığı garanti altına almak için hazırlanmıştır.
+
+Banka, artık mevcut Kredi Kartı müşterileri için, ne zaman edinildiklerinden bağımsız olarak, sağlam bir risk yönetim çerçevesi oluşturma kararı almıştır. Bunu sağlamak için Banka, bir “Davranış Skoru” oluşturmayı planlamaktadır. **Davranış Skoru, öngörücü bir modeldir.** Açık durumda olan ve vadesi geçmiş borcu bulunmayan müşteriler temel alınarak geliştirilir. Model, müşterilerin ilerleyen dönemde Kredi Kartı borçlarını ödeyememe olasılığını tahmin eder.
+
+Bu model daha sonra çeşitli portföy risk yönetimi faaliyetleri için kullanılacaktır.
+
+------------------------------------------------------------------------
+
+### **Problem Tanımı**
+
+Amacınız, A Bankası için Davranış Skoru geliştirmektir.
+
+### **Veri Setleri**
+
+Size, “Dev_data_to_be_shared.zip” dosyasında yer alan 96.806 Kredi Kartı detayından oluşan rastgele bir örnek sağlanmıştır. Bu veri kümesi, **“geliştirme verisi”** (Dev_data_to_be_shared.csv) olarak adlandırılacaktır. Bu veri seti, A Banksının Kredi Kartı portföyünün geçmiş bir anlık görüntüsüdür. Gerçekten temerrüde düşmüş Kredi Kartları için **bad_flag = 1** olarak işaretlenmiştir.
+
+Ayrıca, çeşitli bağımsız değişkenler de sağlanmıştır. Bunlar şunları içerir:
+
+-   **Banka içi değişkenler**: Kredi limiti gibi bilgiler (**onus_attributes ile başlayan değişkenler**)
+
+-   **İşlem düzeyindeki değişkenler**: İşlem sayısı, farklı türdeki tüccarlarda yapılan işlem tutarları (**transaction_attribute ile başlayan değişkenler**)
+
+-   **Kredi bürosu ticari hesap değişkenleri**: Ürün sahipliği, geçmiş gecikmeler gibi bilgiler (**bureau ile başlayan değişkenler**)
+
+-   **Kredi bürosu sorgu değişkenleri**: Son 3 ayda yapılan kişisel kredi başvuruları gibi bilgiler (**bureau_enquiry ile başlayan değişkenler**)
+
+Ayrıca, **“validation_data_to_be_shared.zip”** adlı başka bir veri seti daha sağlanmıştır. Bu veri setinde **41.792 Kredi Kartı detayı** bulunmakta olup, aynı giriş değişkenlerini içermektedir. Ancak, **“bad_flag” değişkeni bu veri setinde yer almamaktadır**. Bu veri seti **“doğrulama verisi”** olarak adlandırılacaktır.
+
+# Veri okuma
+
+Dosya adı "Dev_data_to_be_shared.csv" olan veriyi okuyun:
+
+```{r}
+veri = read.csv("Dev_data_to_be_shared.csv")
+```
+
+Okuduğumuz verinin yapısını inceleyelim:
+
+```{r}
+str(veri)
+```
+
+Verinin başından ve sonundan inceleme
+
+öncelikle ilk değerleri gösterelim
+
+```{r}
+head(veri)
+```
+
+head(veri) fonksiyonu ile verinin başından birkaç satır inceliyoruz.
+
+```{r}
+tail(veri)
+```
+
+Verinin son birkaç satırını tail(veri) fonksiyonu ile inceleyebiliriz.
+
+Verinin içinde örneğin önemli bir parametre olan bad_flag sütununu inceleyelim.
+
+```{r}
+head(veri$bad_flag)
+```
+
+Temerrüt verisi için özet istatistikleri hesaplatalım.
+
+```{r}
+summary(veri$bad_flag)
+
+```
+
+Histogram çizdirelim
+
+```{r}
+hist(veri$bad_flag)
+```
+
+Temerrüt verisini ayrı bir değişkene de atayabiliriz
+
+temerrut adında bir değişkene verinin bad_flag sütununu atayın:
+
+```{r}
+temerrut <- veri$bad_flag
+```
+
+## dplyr işlemleri
+
+dplyr kütüphanesini yükleyin
+
+alt_veri isimli değişkene veriye şu seçimleri uygulayın:
+
+sütun adı onus_attribute ile başlayan VEYA bad_flag ile başlayan
+
+alt_veri yi inceleyin
+
+```{r}
+library(dplyr)
+
+# "onus_attribute" ile başlayan sütunları seç
+alt_veri <- veri %>% select(starts_with("onus_attribute")|starts_with("bad_flag"))
+
+# Sonucu göster
+print(alt_veri)
+```
+
+## Önemli değerleri bulma
+
+sapply fonksiyonunu kullanarak veri'ye is.numeric fonksiyonunu uygula ve sonucu numeric_columns değişkenine ata.
+
+veri_numeric değişkenine verinin numerik sütunlarını ata.
+
+Sabit değerli veya tamamen boş sütunları kaldır ve tekrar veri_numeric değişkenine ata.
+
+veri_numeric için corelasyon matrisi hesapla ve sonucunu cor_matrix değişkenine ata.
+
+Temerrüt (bad_flag)
+
+```{r}
+
+# Sayısal sütunları seç
+numeric_columns <- sapply(veri, is.numeric)
+veri_numeric <- veri[, numeric_columns]
+
+
+# Sabit değerli veya tamamen boş sütunları kaldır
+veri_numeric <- veri_numeric[, sapply(veri_numeric, function(x) length(unique(x[!is.na(x)])) > 1)]
+
+# Korelasyon matrisini hesapla
+cor_matrix <- cor(veri_numeric)
+
+# bad_flag ile korelasyonu al
+cor_bad_flag <- cor_matrix[, "bad_flag"]
+
+# Korelasyonları büyükten küçüğe sırala (mutlak değerine göre)
+cor_sorted <- sort(abs(cor_bad_flag), decreasing = TRUE)
+
+# Sonucu yazdır
+print(cor_sorted)
+
+```
+
+## En önemli 5 değişken
+
+```{r}
+ozet_veri <- veri %>% select(c("bad_flag","onus_attribute_2","onus_attribute_17","onus_attribute_23", "onus_attribute_20"))
+```
+
+veriyi inceleme
+
+```{r}
+ozet_veri
+```
+
+Özet verimiz hariç tüm değişkenleri silelim
+
+```{r}
+write.csv(ozet_veri, "ozet_veri.csv")
+rm(list = ls())
+veri = read.csv("ozet_veri.csv")
+```
+
+## Kutu grafikleri
+
+```{r}
+boxplot(veri$onus_attribute_2)
+boxplot(veri$onus_attribute_17)
+boxplot(veri$onus_attribute_23)
+boxplot(veri$onus_attribute_20)
+```
+
+## Histogram
+
+```{r}
+hist(veri$onus_attribute_2)
+hist(veri$onus_attribute_17)
+hist(veri$onus_attribute_23)
+hist(veri$onus_attribute_20)
+```
+
+Değişken 2 için ortalama , 17 için ortanca, 23 için varyans, 20 için standart sapma hesaplayın:
+
+```{r}
+mean(veri$onus_attribute_2)
+median(veri$onus_attribute_17)
+var(veri$onus_attribute_23)
+sd(veri$onus_attribute_20)
+```
+
+Temerrüt ile değişken 2 arasında pearson, 17 ile kendall, 23 ile spearman korelasyon testlerini yapın ve sırasıyla cor_1 cor_2 ve cor_3 değişkenlerine atayın.
+
+```{r}
+cor_1 <- cor(veri$bad_flag,veri$onus_attribute_2,method = "pearson")
+cor_2 <- cor(veri$bad_flag,veri$onus_attribute_2,method = "kendall")
+cor_3 <- cor(veri$bad_flag,veri$onus_attribute_2,method = "spearman")
+```
