@@ -1,0 +1,1437 @@
+---
+title: "R Uygulamalı Veri Bilimi"
+author: "Ümit Mert Çağlar"
+date: "`r Sys.Date()`"
+css: style.css
+output:
+  slidy_presentation: 
+    duration: 50
+    highlight: espresso
+  beamer_presentation: 
+    toc: true
+    theme: Singapore
+    colortheme: beaver
+    fonttheme: serif
+    highlight: pygments
+  ioslides_presentation: 
+    highlight: pygments
+    smaller: true
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+options(warn=-1)
+```
+
+# R Uygulamalı Veri Bilimi
+
+## Ümit Mert Çağlar
+
+-   ODTÜ Enformatik Enstitüsü (2024-)
+    -   Modelleme ve Simülasyon Araştırma Görevlisi
+-   TUSAŞ Yapay Zeka Mühendisliği (2019-2024)
+    -   Teknik Ekip Lideri
+    -   Yazılım Tasarım Mühendisi
+-   STM (2019-2019)
+    -   Sistem Mühendisi
+-   ODTÜ Enformatik Enstitüsü
+    -   Yüksek Lisans (2018-2021)
+    -   Doktora (2021-)
+-   ODTÜ Elektrik-Elektronik Mühendisliği (2017)
+
+# Eğitim İzlencesi
+
+1.  R ve Veri Bilimine Giriş
+2.  Veri Okuma ve Temizleme
+3.  Veri Dönüşümleri ve Manipülasyonlar
+4.  Veri Analizleri ve İstatistiksel Yaklaşımlar
+5.  Veri Görselleştirme
+6.  Sonuçları Raporlama ve Sunumlar
+7.  Uygulamalı çalışmalar ve Vaka Analizleri
+
+# 1. Giriş
+
+-   R dilinin veri analizinde kullanımı ve avantajları
+-   RStudio arayüzü: Script, konsol, environment ve plot pencereleri
+-   Temel R komutları, veri tipleri, değişkenler ve temel işlemler
+-   Paket yönetimi: CRAN’dan paket yükleme ve güncelleme
+
+# 1.1 R dilinin veri analizinde kullanımı ve avantajları
+
++---------------+---------------------------+-----------------------------+
+| Araç          | Güçlü Yanları             | Olumsuz Özellikleri         |
++:==============+:==========================+:============================+
+| Excel         | Çok kolay kullanım        | Maliyetli                   |
+|               |                           |                             |
+|               | Basit arayüz              | Yavaş                       |
+|               |                           |                             |
+|               |                           | Bir şirkete bağlı           |
+|               |                           |                             |
+|               |                           | Kapalı kaynak               |
+|               |                           |                             |
+|               |                           | Çok kısıtlı programlama     |
++---------------+---------------------------+-----------------------------+
+| Matlab        | Şirket desteği            | Çok maliyetli               |
+|               |                           |                             |
+|               | Kolay kullanım            | Yavaş                       |
+|               |                           |                             |
+|               | Dokümantasyon             | Bir şirkete bağlı           |
+|               |                           |                             |
+|               | Arayüz                    | Kısmen kapalı kaynak        |
+|               |                           |                             |
+|               |                           | Kısıtlı programlama         |
++---------------+---------------------------+-----------------------------+
+| Python        | Açık kaynak topluluğu     | Açık kaynak topluluğu       |
+|               |                           |                             |
+|               | Ücretsiz                  | Geliştirme ortamı sorunları |
+|               |                           |                             |
+|               | Çok geniş kullanım alanı  | Sadece topluluk desteği     |
+|               |                           |                             |
+|               | Yapay Zeka                | Dokümantasyon               |
+|               |                           |                             |
+|               | Topluluk destekli arayüz  |                             |
++---------------+---------------------------+-----------------------------+
+| R             | Açık kaynak topluluğu     | Sadece topluluk desteği     |
+|               |                           |                             |
+|               | Ücretsiz                  | Kısıtlı kullanım alanı      |
+|               |                           |                             |
+|               | İstatistik ve veri bilimi |                             |
+|               |                           |                             |
+|               | Dokümantasyon             |                             |
+|               |                           |                             |
+|               | Topluluk destekli arayüz  |                             |
++---------------+---------------------------+-----------------------------+
+
+# 1.2 RStudio Arayüzü
+
++------------------------------------------+-----------------+
+| Geliştirme Penceresi                     | Değişkenler     |
+|                                          |                 |
+| R Markdown                               | Bağlantılar     |
+|                                          |                 |
+| R Notebook                               | Ortam değerleri |
+|                                          |                 |
+| R Script                                 |                 |
+|                                          |                 |
+| Veya diğer diller (SQL, Python, C++ vb.) |                 |
++------------------------------------------+-----------------+
+| Konsol                                   | Dosyalar        |
+|                                          |                 |
+| Terminal                                 | Grafikler       |
+|                                          |                 |
+| Render                                   | Paketler        |
+|                                          |                 |
+| Arkaplan işleri                          | Yardım          |
+|                                          |                 |
+|                                          | Sunum           |
+|                                          |                 |
+|                                          | Dokümanlar      |
++------------------------------------------+-----------------+
+
+# 1.3 Temel R Komutları, Veri Tipleri, Değişkenler
+
+## Nesne Tabanlı Programlama
+
+-   Nesne Tabanlı Programlama
+
+-   Sınıf Oluşturma
+
+-   Metod Tanımlama
+
+-   Yeni Nesne Oluşturma
+
+R programlama dili, genellikle istatistiksel hesaplamalar ve veri analizi için kullanılan bir dildir. R, nesne tabanlı programlama (OOP) konusunda diğer diller kadar gelişmiş olmasa da, bazı nesne tabanlı programlama özelliklerini destekler.
+
+## Sınıf Oluşturma
+
+Bir liste oluştur ve sınıf ismini "kişi" olarak ata
+
+```{r Sınıf oluşturma, echo = TRUE}
+# Bir liste oluştur ve sınıf ismini "kişi" olarak ata
+kişi <- list(adı = "Ali", yaşı = 30)
+class(kişi) <- "kişi"
+
+# Sınıfı kontrol et
+class(kişi)
+```
+
+## Metod Tanımlama
+
+print metodunu person sınıfı için özelleştir
+
+```{r metod tanımlama, echo = TRUE}
+# print metodunu person sınıfı için özelleştir
+print.kişi <- function(nesne) {
+  cat("Adı:", nesne$adı, "\n")
+  cat("Yaşı:", nesne$yaşı, "\n")
+}
+
+# print fonksiyonunu çağır
+print(kişi)
+```
+
+## Yeni Nesne Oluşturma
+
+Yeni bir kişi nesnesi oluştur, var olan kişi nesnesinin fonksiyonu bu nesnede de geçerli olur.(Inheritance-Miras)
+
+```{r yeni nesne, echo = TRUE}
+# Yeni bir kişi nesnesi oluştur
+yeni_kişi <- list(adı = "Ayşe", yaşı = 25)
+class(yeni_kişi) <- "kişi"
+
+# print metodunu çağır
+print(yeni_kişi)
+```
+
+## Yardım
+
+-   `?max`: max fonksiyonu için yardım belgelerini gösterir
+
+-   `?tidyverse`: tidyverse paketinin belgelerini gösterir
+
+-   `??"max"`: Belirli bir girdiyle ilişkili belgeleri döndürür
+
+-   `str(my_df)`: Belirli bir nesnenin yapısını ve bilgilerini döndürür
+
+-   `class(my_df)`: Verilen nesnenin sınıfını döndürür
+
+## Sayısal İşlemler
+
+|              |                                  |
+|--------------|----------------------------------|
+| **Operatör** | **Tanım**                        |
+| `a + b`      | İki değişkeni toplar             |
+| `a - b`      | İki değişkeni çıkarır            |
+| `a * b`      | İki değişkeni çarp               |
+| `a / b`      | İki değişkeni böl                |
+| `a ^ b`      | Bir değişkenin üsselleştirilmesi |
+| `a %% b`     | Bir değişkenin kalanı            |
+| `a %/% b`    | Değişkenlerin tam sayı bölümü    |
+
+## Mantıksal İşlemler
+
+|              |                            |
+|--------------|----------------------------|
+| **Operatör** | **Tanım**                  |
+| `!`          | Mantıksal DEĞİL            |
+| `&`          | Öğe bazında Mantıksal VE   |
+| `&&`         | Mantıksal VE               |
+| `|`          | Öğe bazında Mantıksal VEYA |
+| `||`         | Mantıksal VEYA             |
+
+## İlişkisel İşlemler
+
+|              |                                   |
+|--------------|-----------------------------------|
+| **Operatör** | **Tanım**                         |
+| `a == b`     | Eşitlik testleri                  |
+| `a != b`     | Eşitsizlik testleri               |
+| `a > b`      | Daha büyük testler                |
+| `a < b`      | Daha küçük testler                |
+| `a >= b`     | Daha büyük veya eşit için testler |
+| `a <= b`     | Daha küçük veya eşit için testler |
+
+## Atama
+
++---------------+-----------------------+
+| **Operatör**  | **Tanım**             |
++---------------+-----------------------+
+| `x <- 1`      | x'e bir değişken atar |
+|               |                       |
+| `x = 1`       |                       |
++---------------+-----------------------+
+
+## Vektör
+
++----------------------+-------------------+-------------------------------------------------------------------------------------------------------+
+| **Giriş**            | **Çıktı**         | **Tanım**                                                                                             |
++----------------------+-------------------+-------------------------------------------------------------------------------------------------------+
+| `c(1,3,5)`           | `1 3 5`           | Virgülle ayrılmış öğeleri kullanarak bir vektör oluşturur                                             |
++----------------------+-------------------+-------------------------------------------------------------------------------------------------------+
+| `1:7`                | `1 2 3 4 5 6 7`   | İki sayı arasında tam sayılardan oluşan bir vektör oluşturur                                          |
++----------------------+-------------------+-------------------------------------------------------------------------------------------------------+
+| `seq(2,8,by = 2)`    | `2 4 6 8`         | İki sayı arasında, her bir eleman arasında belirtilen bir aralık olacak şekilde bir vektör oluşturur. |
++----------------------+-------------------+-------------------------------------------------------------------------------------------------------+
+| `rep(2,8,times = 4)` | `2 8 2 8 2 8 2 8` | Belirli sayıda tekrarlanan verilen elemanlardan oluşan bir vektör oluşturur.                          |
++----------------------+-------------------+-------------------------------------------------------------------------------------------------------+
+| `rep(2,8,each = 3)`  | `2 2 2 8 8 8`     | Verilen öğelerin her birini belirli sayıda tekrarlayan bir vektör oluşturur.                          |
++----------------------+-------------------+-------------------------------------------------------------------------------------------------------+
+
+## Vektör Fonksiyonları
+
+-   `sort(my_vector)`: Sıralanmış olarak döner
+
+-   `rev(my_vector)`: Sırasını tersine çevirir
+
+-   `table(my_vector)`: Bir vektördeki değerleri say
+
+-   `unique(my_vector)`: Bir vektördeki farklı elemanlar
+
+## Vektör Elemanlarına Erişim
+
+-   `my_vector[6]`: Altıncı öğeyi döndürür
+
+-   `my_vector[-6]`: Altıncı öğe hariç tümünü döndürür
+
+-   `my_vector[2:6]`: İki ila altı arasındaki öğeleri döndürür
+
+-   `my_vector[-(2:6)]`: İkinci ve altıncı arasındakiler hariç tüm öğeleri döndürür
+
+-   `my_vector[c(2,6)]`: İkinci ve altıncı öğeleri döndürür
+
+-   `my_vector[my_vector == 5]`: `5`'e eşit öğeleri döndürür
+
+-   `my_vector[my_vector < 5 ]`: `5`'den küçük öğeleri döndürür
+
+-   `my_vector[my_vector %in% c(2, 5 ,8 )]`: `{2, 5, 8}` Kümesindeki öğeleri döndürür
+
+## Matematiksel Fonksiyonlar
+
+-   `log(x)`: Bir değişkenin logaritmasını döndürür
+
+-   `exp(x)`: Bir değişkenin üstel değerini döndürür
+
+-   `max(x)`: Bir vektörün maksimum değerini döndürür
+
+-   `min(x)`: Bir vektörün en küçük değerini döndürür
+
+-   `mean(x)`: Bir vektörün ortalamasını döndürür
+
+-   `sum(x)`: Bir vektörün toplamını döndürür
+
+-   `median(x)`: Bir vektörün medyanını döndürür
+
+-   `quantile(x)`: Bir vektörün yüzdelik dilimleri
+
+-   `round(x, n)`: n ondalık basamağa yuvarla
+
+-   `rank(x)`: Bir vektördeki elemanların sıralaması
+
+-   `signif(x, n)`: Anlamlı rakamları yuvarlayın
+
+-   `var(x)`: Bir vektörün varyansı
+
+-   `cor(x, y)`: İki vektör arasındaki korelasyon
+
+-   `sd(x)`: Bir vektörün standart sapması
+
+# 1.4 Paketler
+
+-   `install.packages(“tidyverse”)`: Yeni paketler yüklemenizi sağlar (örneğin, tidyverse paketi)
+
+-   `library(tidyverse)`: Paketleri yüklemenizi ve kullanmanızı sağlar (örneğin, tidyverse paketi)
+
+-   RStudio Paketler arayüzünden de yükleme ve güncelleme yapabilirsiniz
+
+## Örnek çalışma
+
+```{r}
+# Gerekli kütüphaneleri yükleme
+library(tidyverse)
+
+# Verisetini yükleme (mtcars)
+data <- mtcars
+
+# İlk birkaç satıra bakma
+head(data)
+
+# Özet istatistikler
+summary(data)
+
+# Eksik değer var mı?
+sum(is.na(data))
+
+# Veri görselleştirme
+# MPG Histogramı
+ggplot(data, aes(x = mpg)) +
+  geom_histogram(binwidth = 2, fill = 'blue', color = 'black', alpha = 0.7) +
+  labs(title = 'Distribution of MPG', x = 'Miles Per Gallon', y = 'Count')
+
+# Scatter plot of Horsepower vs. MPG
+ggplot(data, aes(x = hp, y = mpg)) +
+  geom_point(color = 'red', alpha = 0.6) +
+  geom_smooth(method = 'lm', color = 'blue', se = FALSE) +
+  labs(title = 'Horsepower vs. MPG', x = 'Horsepower', y = 'MPG')
+
+# Boxplot of MPG by Cylinder Count
+ggplot(data, aes(x = factor(cyl), y = mpg)) +
+  geom_boxplot(fill = 'green', alpha = 0.6) +
+  labs(title = 'MPG by Cylinder Count', x = 'Number of Cylinders', y = 'MPG')
+
+# Correlation matrix
+cor_matrix <- cor(data)
+print(cor_matrix)
+
+# İşlenmiş veriyi kaydetme
+write.csv(data, 'cleaned_data.csv', row.names = FALSE)
+```
+
+## Örnek Çalışma 2
+
+### Kütüphaneler
+
+```{r}
+# Load the libraries
+library(tidyverse)
+library(ggplot2)
+library(dplyr)
+library(readr)
+```
+
+### Veri
+
+```{r}
+# Load a dataset (for example, the built-in 'mtcars' dataset)
+data(mtcars)
+
+# Alternatively, you can load your own dataset from a CSV file
+# mtcars <- read_csv("path_to_your_file.csv")
+
+# View the first few rows of the dataset
+head(mtcars)
+```
+
+### Veri keşfi
+
+```{r}
+# Get a summary of the dataset
+summary(mtcars)
+
+# Check the structure of the dataset
+str(mtcars)
+
+# Check for missing values
+sum(is.na(mtcars))
+
+# Get the dimensions of the dataset (rows x columns)
+dim(mtcars)
+
+# Get the column names
+colnames(mtcars)
+```
+
+### Veri temizleme
+
+```{r}
+# Example: Replace missing values with the mean (if any)
+mtcars <- mtcars %>%
+  mutate(across(everything(), ~ ifelse(is.na(.), mean(., na.rm = TRUE), .)))
+
+# Check again for missing values
+sum(is.na(mtcars))
+```
+
+### Veri görselleştirme
+
+```{r}
+# Scatter plot of mpg vs. hp
+ggplot(mtcars, aes(x = hp, y = mpg)) +
+  geom_point() +
+  labs(title = "Scatter plot of MPG vs. Horsepower",
+       x = "Horsepower",
+       y = "Miles per Gallon")
+
+# Boxplot of mpg by number of cylinders
+ggplot(mtcars, aes(x = as.factor(cyl), y = mpg)) +
+  geom_boxplot() +
+  labs(title = "Boxplot of MPG by Number of Cylinders",
+       x = "Number of Cylinders",
+       y = "Miles per Gallon")
+
+# Histogram of mpg
+ggplot(mtcars, aes(x = mpg)) +
+  geom_histogram(binwidth = 5, fill = "blue", color = "black") +
+  labs(title = "Histogram of MPG",
+       x = "Miles per Gallon",
+       y = "Frequency")
+```
+
+### Temel istatistiksel analizler
+
+```{r}
+# Correlation matrix
+cor(mtcars)
+
+# Linear regression model: mpg as a function of hp and wt
+model <- lm(mpg ~ hp + wt, data = mtcars)
+summary(model)
+
+# ANOVA ile farklı silindir gruplarını mpg ortalamasıyla karşılaştırma
+anova_result <- aov(mpg ~ as.factor(cyl), data = mtcars)
+summary(anova_result)
+```
+
+### İşlenmiş veriyi kaydetme
+
+```{r}
+# İşlenmiş veriyi başka bir dosyaya kaydetme
+write_csv(mtcars, "cleaned_mtcars.csv")
+```
+
+### Raporlama ve sunuş
+
+R markdon ile dinamik raporlama yapabilir, kod, görselleştirme ve analizleri bir arada sunabilirsiniz.
+
+# 2. Veri İçe Aktarma ve Temizleme
+
+-   Farklı veri biçimleri
+    -   Veri BiçimlerininTanıtımı (CSV, Excel, JSON, SQL veri tabanları)
+    -   Verilerin R ortamına aktarılması ve analiz öncesi veri hazırlama
+    -   readr, readxl gibi paketlerle veri okuma
+    -   Veri yapılarının incelenmesi: data.frame, tibble ve listeler
+-   Veri temizleme teknikleri
+    -   Eksik değerlerin, aykırı değerlerin tespiti ve yönetimi
+    -   Veri tiplerinin dönüştürülmesi ve format ayarlamaları
+    -   Dönüşümler ve filtreleme işlemleri (ör. dplyr ile)
+
+# 2.1 Veri Biçimleri
+
+```{r}
+# Gerekli kütüphaneleri yükleme
+library(readr)
+library(writexl)
+library(jsonlite)
+library(readxl)
+
+# Basit bir veri çerçevesi oluşturma
+veri <- data.frame(
+  ID = c(1, 2, 3),
+  Isim = c("Ali", "Ayşe", "Mehmet"),
+  Yas = c(25, 30, 35)
+)
+
+# CSV dosyası oluşturma ve okuma
+write_csv(veri, "ornek_veri.csv")
+cat("CSV dosyası oluşturuldu.\n")
+okunan_csv <- read_csv("ornek_veri.csv")
+print(okunan_csv)
+
+# Excel dosyası oluşturma ve okuma
+write_xlsx(veri, "ornek_veri.xlsx")
+cat("Excel dosyası oluşturuldu.\n")
+okunan_excel <- read_excel("ornek_veri.xlsx")
+print(okunan_excel)
+
+# JSON dosyası oluşturma ve okuma
+write_json(veri, "ornek_veri.json", pretty = TRUE)
+cat("JSON dosyası oluşturuldu.\n")
+okunan_json <- fromJSON("ornek_veri.json")
+print(okunan_json)
+```
+
+```{r}
+# CSV dosyasını silme
+unlink("ornek_veri.csv")
+cat("ornek_veri.csv dosyası silindi.\n")
+
+# Excel dosyasını silme
+unlink("ornek_veri.xlsx")
+cat("ornek_veri.xlsx dosyası silindi.\n")
+
+# JSON dosyasını silme
+unlink("ornek_veri.json")
+cat("ornek_veri.json dosyası silindi.\n")
+```
+
+## SQL
+
+SQL veritabanlarından veri çekmek için kullanılan bir sorgulama dilidir. Bu dil sayesinde istenen kriterlere uygun, çeşitli veritabanlarından birleştirmeler gibi özelliklerle beraber veri çekilebilir. R dilinde de SQL veritabanlarından veri çekmek, veri yazmak ve kaydetmek mümkündür.
+
+Öncelikle gerekli kütüphaneleri yükleyerek başlıyoruz.
+
+```{r kütüphaneler}
+library(odbc) #Veritabanına bağlanmak için gereken sürücüler
+library(DBI) #Veritabanıyla iletişim kurmak için gerekenler
+library(RSQL) #SQL sorgularını R dilinde koşmak için gereken kütüphane
+library(RSQLite) #Yerel bir SQL veritabanı oluşturmak için gereken kütüphane
+library(tidyverse) #R dilinde düzenli veri işlemek için gereken yardımcı
+library(ggplot2) #Görselleştirme kütüphanesi
+```
+
+## Veritabanı
+
+Veritabanı oluşturmak için yüklediğimiz kütüphanede var olan population ve who verisetlerini yüklüyoruz.
+
+Ardından hafızada yer alacak geçici bir veritabanı oluşturuyoruz.
+
+SQLite aracılığıyla veritabanı bağlantısı tanımlayıp, yerelde yüklediğimiz verisetlerini veritabanına yazıyoruz.
+
+```{r veri tabanı}
+
+data("population")
+data("who")
+
+#Build the placeholder (CREATE A DATABASE)
+con <- dbConnect(drv = RSQLite::SQLite(),
+                 dbname = ":memory:")
+
+dbListTables(con)
+
+#Load the population table
+dbWriteTable(conn = con, 
+             name = "population",
+             value = population)
+
+#Load the who table
+dbWriteTable(conn = con, 
+             name = "who",
+             value = who)
+
+dbListTables(con)
+
+```
+
+## Veri Tablosu
+
+Yerelde tuttuğumuz verisetlerini siliyor ve veritabanımıza ulaşarak verileri tablo halinde görselleştiriyoruz.
+
+```{r tablo}
+#remove the local data from the environment
+rm(who, population)
+
+tbl(src = con, #the source of the database connection profile
+    "who") #the name of the table to preview
+
+```
+
+## SQL komutuyla veri çekme
+
+SQL komutunu doğrudan R Markdown içerisinde çalıştırmak için aşağıdaki bölüm başlığını sql, bağlantısını "con", çıktısını da "M1_results" olarak açıkça belirtiyoruz. Bölüm içerisine hangi verileri, hangi verisetinden, nasıl birleştirerek çekmek istediğimizi belirtiyoruz.
+
+```{sql, connection = con, output.var="M1_results"}
+
+SELECT who.country, who.year, who.new_sp_m2534, population.population
+FROM who
+LEFT JOIN population ON population.country = who.country AND population.year = who.year
+WHERE who.country IN ('Turkey', 'Germany') AND who.year >= 2000 AND who.year <= 2010
+
+```
+
+Çıktıyı incelediğimizde belirttiğimiz aralıktaki değerleri elde ettiğimizi görüyoruz.
+
+```{r sql sorgusu}
+head(M1_results)
+```
+
+## dbGetQuery komutuyla veri çekme
+
+Benzer şekilde R dilindeki nesnelere SQL sorgusunun anahtar kelimelerini kullanarak SQL sorgusu yapabiliriz. Aynı sorguyu aşağıdaki bölümde "select", "from", "ljoin" ve "where" anahtar kelimeleriyle ve dbGetQuery fonksiyonuyla "M2_results" çıktısını elde ediyoruz. Çıktıyı incelediğimizde bir önceki çıktıya aynı olduğunu gözlemliyoruz.
+
+```{r dbGetQuery ile sql sorgusu}
+
+select <- "SELECT who.country, who.year, who.new_sp_m2534, population.population"
+from <- "FROM who"
+ljoin <- "LEFT JOIN population ON population.country = who.country AND population.year = who.year"
+where <- "WHERE who.country IN ('Turkey', 'Germany') AND who.year >= 2000 AND who.year <= 2010"
+
+query <- paste(select, from, ljoin, where)
+
+M2_results <- DBI::dbGetQuery(conn = con,
+                              statement = query)
+
+head(M2_results)
+
+
+```
+
+## dplyr ile veri çekme
+
+dplyr kütüphanesi SQL dilinden farklı olarak filtreleme, veri seçme, birleştirme fonksiyonlarını kendi içinde tanımlandığı gibi kullanmamıza olanak sağlar. Aşağıdaki bölümde dplyr ile yukarıdaki sql sorgularının aynısını yapıyoruz. Sonuç olarak elde ettiğimiz M3_results incelendiğinde aynı değerleri çektiğimiz görünmektedir.
+
+```{r dplyr ile sql sorgusu}
+
+M3_results <- 
+  tbl(src = con, "who") %>% 
+  filter(country %in% c("Turkey", "Germany"),
+         year >= 2000,
+         year <= 2010) %>% 
+  dplyr::select(country, year, new_sp_m2534) %>% 
+  left_join(y = tbl(src = con, "population"),
+            by = c("country", "year")) %>% 
+  collect() #this tells dplyr to execute and store the query
+
+head(M3_results)
+```
+
+## Görselleştirme
+
+### Line Plot
+
+```{r ggplot line plot}
+data <-M1_results
+ggplot(data, aes(x = year, y = new_sp_m2534, color = country, group = country)) +
+  geom_line(size = 1) +
+  geom_point(size = 3) +
+  labs(title = "New Cases Over Time",
+       x = "Year",
+       y = "New Cases (Males 25-34)") +
+  theme_minimal()
+```
+
+### Bar Chart
+
+```{r bar chart}
+ggplot(data, aes(x = as.factor(year), y = new_sp_m2534, fill = country)) +
+  geom_bar(stat = "identity", position = "dodge") +
+  labs(title = "New Cases Per Year",
+       x = "Year",
+       y = "New Cases (Males 25-34)") +
+  theme_minimal()
+```
+
+### Trend
+
+```{r trend}
+ggplot(data, aes(x = year, y = population / 1e7, color = country, group = country)) +
+  geom_line(size = 1) +
+  geom_point(size = 3) +
+  labs(title = "Population Trend Over Years",
+       x = "Year",
+       y = "Population (in tens of millions)") +
+  theme_minimal()
+```
+
+### Scatter Plot
+
+```{r scatter plot}
+ggplot(data, aes(x = population, y = new_sp_m2534, color = country)) +
+  geom_point(size = 3, alpha = 0.7) +
+  geom_smooth(method = "lm", se = FALSE) +
+  labs(title = "New Cases vs. Population",
+       x = "Population",
+       y = "New Cases (Males 25-34)") +
+  theme_minimal()
+```
+
+# 2.2 Veri Okuma
+
+R dilinde veri okuma işlemleri, özellikle büyük veri setleriyle çalışırken oldukça önemlidir. `readr` ve `readxl` paketleri, bu işlemleri kolaylaştıran ve performans açısından optimize edilmiş paketlerdir. Şimdi bu paketlerle veri okuma işlemlerini inceleyelim.
+
+## Veri oluşturma
+
+Öncelikle kullanacağımız verileri oluşturalım. Ardından bu verileri ilgili dosya biçimlerinde kaydedelim.
+
+```{r}
+library(readr)
+library(readxl)
+library(haven)
+library(jsonlite)
+library(writexl)
+library(data.table)
+```
+
+```{r}
+# Örnek veri seti oluşturma
+ornek_veri <- data.frame(
+  id = 1:5,
+  name = c("Ali", "Veli", "Ayse", "Fatma", "Mehmet"),
+  age = c(23, 45, 30, 19, 22),
+  salary = c(3000, 4000, 2500, 3500, 2800),
+  gender = c("M", "M", "F", "F", "M"),
+  stringsAsFactors = FALSE
+)
+```
+
+```{r}
+# Dosyaları kaydetme
+write.csv(ornek_veri, "ornek_veri.csv", row.names = FALSE)
+write.table(ornek_veri, "ornek_veri.txt", row.names = FALSE, sep = "\t")
+write_xlsx(ornek_veri, "ornek_veri.xlsx")
+write_sav(ornek_veri, "ornek_veri.sav")
+write_json(ornek_veri, "ornek_veri.json")
+```
+
+## readr Paketi ile Veri Okuma
+
+`readr` paketi, metin tabanlı dosyaları (CSV, TXT, vb.) hızlı ve verimli bir şekilde okumak için kullanılır. `base R` fonksiyonlarına göre daha hızlıdır ve otomatik veri tipi tahmini yapar.
+
+## CSV Dosyası Okuma
+
+```{r}
+# CSV dosyasını okuma
+data_csv <- read_csv("ornek_veri.csv")
+
+# Veriyi inceleme
+print(data_csv)
+str(data_csv)
+```
+
+## TXT Dosyası Okuma
+
+```{r}
+# TXT dosyasını okuma
+data_txt <- read_delim("ornek_veri.txt", delim = "\t")
+
+# Veriyi inceleme
+print(data_txt)
+str(data_txt)
+```
+
+## readr Fonksiyonları
+
+\- `read_csv()`: CSV dosyalarını okur.\
+- `read_delim()`: Özel bir ayraç (delimiter) kullanarak dosyaları okur.\
+- `read_table()`: Sabit genişlikteki dosyaları okur.\
+
+## readxl Paketi ile Excel Dosyalarını Okuma
+
+`readxl` paketi, Excel dosyalarını (`.xls` ve `.xlsx`) okumak için kullanılır. Excel dosyalarındaki farklı sayfaları ve hücre aralıklarını okumayı destekler.
+
+## Excel Dosyası Okuma
+
+```{r}
+# Excel dosyasını okuma
+data_excel <- read_excel("ornek_veri.xlsx", sheet = 1)  # 1. sayfayı okur
+
+# Veriyi inceleme
+print(data_excel)
+str(data_excel)
+```
+
+## `readxl` Fonksiyonları
+
+\- `read_excel()`: Excel dosyalarını okur.\
+- `excel_sheets()`: Excel dosyasındaki sayfaların isimlerini listeler.\
+
+```{r}
+# Belirli bir hücre aralığını okuma
+data_range <- read_excel("ornek_veri.xlsx", range = "A1:C10")
+
+# Veriyi inceleme
+print(data_range)
+str(data_range)
+```
+
+## data.table
+
+`data.table` paketi, büyük veri setlerini hızlı bir şekilde okumak ve manipüle etmek için kullanılır.
+
+```{r}
+# CSV dosyasını okuma
+data_dt <- fread("ornek_veri.csv")
+
+# Veriyi inceleme
+print(data_dt)
+str(data_dt)
+```
+
+## haven Paketi
+
+`haven` paketi, SPSS, SAS ve Stata gibi istatistiksel yazılımların dosya formatlarını okumak için kullanılır.
+
+```{r}
+# SPSS dosyasını okuma
+data_spss <- read_sav("ornek_veri.sav")
+
+# Veriyi inceleme
+print(data_spss)
+str(data_spss)
+```
+
+## jsonlite Paketi
+
+`jsonlite` paketi, JSON formatındaki dosyaları okumak ve işlemek için kullanılır.
+
+```{r}
+# JSON dosyasını okuma
+data_json <- fromJSON("ornek_veri.json")
+
+# Veriyi inceleme
+print(data_json)
+str(data_json)
+```
+
+## Tüm Paketlerin Bir Arada Kullanımı
+
+Aşağıdaki örnekte, `readr`, `readxl`, `data.table`, `haven` ve `jsonlite` paketlerini kullanarak farklı dosya formatlarını okuyoruz:
+
+```{r}
+# CSV dosyasını okuma (readr)
+data_csv <- read_csv("ornek_veri.csv")
+
+# Excel dosyasını okuma (readxl)
+data_excel <- read_excel("ornek_veri.xlsx", sheet = 1)
+
+# CSV dosyasını okuma (data.table)
+data_dt <- fread("ornek_veri.csv")
+
+# SPSS dosyasını okuma (haven)
+data_spss <- read_sav("ornek_veri.sav")
+
+# JSON dosyasını okuma (jsonlite)
+data_json <- fromJSON("ornek_veri.json")
+
+```
+
+```{r}
+# Verileri inceleme
+print(data_csv)
+print(data_excel)
+print(data_dt)
+print(data_spss)
+print(data_json)
+```
+
+## Özet
+
+-   **`readr`**: Metin tabanlı dosyaları hızlı bir biçimde okumak içindir
+-   **`readxl`**: Excel dosyalarını okumak için kullanışlıdır.
+-   **`data.table`**: Büyük veri setlerini okumak ve manipüle etmek içindir.
+-   **`haven`**: SPSS, SAS ve Stata gibi istatistiksel yazılımların dosya biçimlerini okumak için kullanılır.
+-   **`jsonlite`**: JSON formatındaki dosyaları okumak ve işlemek için kullanışlıdır.\
+
+Bu paketler, farklı dosya formatlarını okumak ve veri analizi sürecine hazır hale getirmek için oldukça kullanışlıdır. İhtiyaca göre doğru paketi seçerek veri okuma işlemlerinizi kolaylaştırabilirsiniz.
+
+# 2.3 Veri Yapıları
+
+R dilinde veri yapıları, veri analizi ve manipülasyonu sürecinde büyük önem taşır. Veri yapıları oldukça esnektir ve farklı veri türlerini saklamak ve işlemek için çeşitli veri yapıları sunar. Bu yapılar, veri analizi, istatistik, makine öğrenimi ve veri görselleştirme gibi birçok alanda kullanılır. En yaygın kullanılan veri yapıları `data.frame`, `tibble` ve `list`'dir. Bu yapıların her biri farklı durumlarda kullanılır ve kendine özgü avantajlara sahiptir. Aşağıda R'nin temel veri yapıları detaylıca açıklanmış ve her biri örneklerle gösterilmiştir.
+
+## Vektör (Vector)
+
+Vektörler, aynı türdeki verileri içeren bir veri yapısıdır. R'de en temel veri yapısıdır.
+
+**Özellikler:**\
+- Tek tip veri içerir (numeric, character, logical vb.).\
+- 1 boyutludur.\
+- Elemanlara indeksleme ile erişilebilir (`[ ]`).\
+
+**Oluşturma ve Kullanım**
+
+```{r vektör}
+# Numeric vektör
+vec_numeric <- c(1, 2, 3, 4, 5)
+
+# Character vektör
+vec_char <- c("A", "B", "C", "D")
+
+# Logical vektör
+vec_logical <- c(TRUE, FALSE, TRUE, TRUE)
+
+# Elemanlara erişim
+vec_numeric[2]  # 2. elemanı alır
+vec_char[c(1, 3)]  # 1. ve 3. elemanı alır
+
+# Elemanları sıralama
+
+fruits <- c("muz", "elma", "portakal", "ayva", "limon")
+numbers <- c(13, 3, 5, 7, 20, 2)
+
+sort(fruits)  # Sort a string
+sort(numbers) # Sort numbers
+
+fruits[c(-2)] <- "kiraz"
+fruits
+
+```
+
+**Kullanım Yerleri ve Güçlü Yanları:**\
+- Tek tip veri içeren verileri saklamak için idealdir.\
+- Matematiksel işlemler ve vektörel işlemler için çok hızlıdır.\
+- Basit diziler ve listeler için uygundur.
+
+## Matris (Matrix)
+
+Matrisler, aynı türde verileri içeren 2 boyutlu veri yapılarıdır.
+
+**Özellikler:**\
+- Satır ve sütun yapısına sahiptir.\
+- Elemanlara `[row, col]` ile erişilir.\
+
+**Oluşturma ve Kullanım:**
+
+```{r matris}
+# 3x3 numeric matris
+mat <- matrix(1:9, nrow = 3, byrow = TRUE)
+mat
+# Elemanlara erişim
+mat[1, 2]  # 1. satır, 2. sütun elemanı
+mat[, 2]  # 2. sütundaki tüm elemanlar
+mat[2, ]  # 2. satırdaki tüm elemanlar
+```
+
+**Kullanım Yerleri ve Güçlü Yanları:**\
+- Matematiksel hesaplamalar ve doğrusal cebir işlemleri için idealdir.\
+- Veri analizinde ve görüntü işlemede kullanılır.\
+
+## Dizi (Array)
+
+Diziler, matrise benzer ancak 2'den fazla boyuta sahip olabilir.
+
+**Özellikler:**\
+- Birden fazla boyuta sahiptir (3D, 4D vb.).\
+- Elemanlara `[dim1, dim2, dim3]` ile erişilir.\
+
+**Oluşturma ve Kullanım:**
+
+```{r dizi}
+# 3x3x2 boyutunda bir dizi oluşturma
+arr <- array(1:18, dim = c(3, 3, 2))
+
+# Elemanlara erişim
+arr[1, 2, 1]  # 1. katman, 1. satır, 2. sütun elemanı
+```
+
+**Kullanım Yerleri ve Güçlü Yanları:**\
+- Çok boyutlu veri analizi için kullanılır.\
+- İstatistiksel analizlerde ve makine öğreniminde kullanılır.\
+
+## Faktör (Factor)
+
+Faktörler, kategorik verileri saklamak için kullanılır.
+
+**Özellikler:**\
+- Sınırlı ve tekrar eden kategorileri içerir.\
+- R, faktör değişkenlerini "levels" olarak saklar.\
+
+**Oluşturma ve Kullanım:**
+
+```{r faktör}
+# Faktör değişken oluşturma
+colors <- factor(c("Red", "Blue", "Green", "Red", "Blue"))
+
+# Faktör seviyelerini görüntüleme
+levels(colors)
+
+# Faktörlerin sayısal karşılıklarını alma
+as.numeric(colors)
+```
+
+**Kullanım Yerleri ve Güçlü Yanları:**\
+- Kategorik verileri analiz etmek için kullanılır.\
+- Grafiklerde ve istatistiksel analizlerde performans sağlar.\
+
+## Liste (List)
+
+Listeler, farklı türden verileri bir arada saklayabilir.
+
+**Özellikler:**\
+- İçinde farklı veri yapıları (vektör, matris, veri çerçevesi vb.) bulunabilir.\
+- Elemanlara `$` veya `[[ ]]` ile erişilir.\
+
+**Oluşturma ve Kullanım:**
+
+```{r liste}
+# Farklı türde veri içeren bir liste oluşturma
+my_list <- list("elma", "armut", "ayva")
+
+# Elemanlara erişim
+my_list[2] # "armut"
+
+"elma" %in% my_list # True
+
+length(my_list) # 3
+
+my_list[1] <- "karadut"
+
+append(my_list, "portakal")
+
+my_list <- append(my_list, "muz", after = 2)
+
+my_list
+
+
+```
+
+**Kullanım Yerleri ve Güçlü Yanları:** - Farklı veri türlerini saklamak için idealdir. - JSON ve XML veri yapıları ile çalışırken kullanılır.
+
+## Veri Çerçevesi (Data Frame)
+
+Veri çerçeveleri, farklı türde sütunları olan tablo formatında bir veri yapısıdır.
+
+**Özellikler:**\
+- Satır ve sütunlardan oluşur.\
+- Her sütun farklı veri türü içerebilir.\
+- Elemanlara `[row, col]` veya `$` ile erişilebilir.\
+
+**Oluşturma ve Kullanım:**
+
+```{r data.frame}
+# Örnek veri çerçevesi oluşturma
+df <- data.frame(
+  Name = c("Ali", "Ayşe", "Mehmet"),
+  Age = c(25, 30, 22),
+  Score = c(90, 85, 88)
+)
+
+# Elemanlara erişim
+df$Name  # Tüm isimleri alır
+df[2, ]  # 2. satırı alır
+df[df$Age > 25, ]  # Yaşı 25'ten büyük olanları filtreler
+```
+
+**Kullanım Yerleri ve Güçlü Yanları:**\
+- Veri analizi ve veri işleme için en yaygın kullanılan yapı.\
+- Büyük veri kümeleriyle çalışmak için idealdir.
+
+## Tibble (tibble)
+
+Tibble, veri çerçevesinin (data frame) geliştirilmiş bir versiyonudur ve **tidyverse** paketinde bulunur.
+
+**Özellikler:**\
+- **Daha okunaklıdır:** Konsolda veri çerçeveleri gibi gereksiz uzun çıktılar vermez.\
+- **Performans açısından daha iyidir.**\
+- **Varsayılan olarak karakterleri string olarak almaz.**\
+- **Liste sütunları içerebilir.**\
+
+**Oluşturma ve Kullanım:**
+
+```{r tibble}
+# Gerekli paketi yükleyelim
+library(dplyr)
+library(tibble)
+
+# Tibble oluşturma
+tb <- tibble(
+  Name = c("Ali", "Ayşe", "Mehmet"),
+  Age = c(25, 30, 22),
+  Score = c(90, 85, 88)
+)
+
+# Elemanlara erişim
+tb$Name  # Tüm isimleri alır
+tb[2, ]  # 2. satırı alır
+tb %>% filter(Age > 25)  # Yaşı 25'ten büyük olanları filtreler
+```
+
+**Kullanım Yerleri ve Güçlü Yanları:**\
+- Büyük veri kümeleriyle çalışırken daha hızlıdır.\
+- Daha düzenli bir çıktı formatı sunar.\
+- dplyr ve diğer tidyverse paketleriyle entegrasyonu kolaydır.\
+- Tibble, klasik veri çerçevesine göre daha kullanıcı dostu ve modern bir alternatiftir.
+
+## Özet
+
++---------------------------------+-------------+-------------+--------------------------------------------------+
+| Veri Yapısı                     | Boyut       | Veri Türü   | Kullanım Alanları                                |
++=================================+=============+=============+==================================================+
+| **Vektör**                      | 1D          | Tek tip     | Basit diziler, matematiksel işlemler             |
++---------------------------------+-------------+-------------+--------------------------------------------------+
+| **Matris**                      | 2D          | Tek tip     | Doğrusal cebir, matematiksel hesaplamalar        |
++---------------------------------+-------------+-------------+--------------------------------------------------+
+| **Dizi (Array)**                | 3D+         | Tek tip     | Çok boyutlu veri analizi                         |
++---------------------------------+-------------+-------------+--------------------------------------------------+
+| **Faktör (Factor)**             | 1D          | Kategorik   | Kategorik veri analizi                           |
++---------------------------------+-------------+-------------+--------------------------------------------------+
+| **Liste (List)**                | 1D          | Farklı tip  | Karmaşık veri yapıları                           |
++---------------------------------+-------------+-------------+--------------------------------------------------+
+| **Veri Çerçevesi (Data Frame)** | 2D          | Farklı tip  | Veri analizi, istatistik                         |
++---------------------------------+-------------+-------------+--------------------------------------------------+
+| **Tibble**                      | 2D          | Farklı tip  | Tidyverse ile veri analizi, büyük veri işlemleri |
++---------------------------------+-------------+-------------+--------------------------------------------------+
+
+## data.frame
+
+`data.frame`, R'ın temel veri yapılarından biridir. Tablo benzeri bir yapı sunar ve her sütun farklı bir veri tipine sahip olabilir.
+
+**Örnek:**
+
+```{r data frame2}
+# data.frame oluşturma
+df2 <- data.frame(
+  id = 1:5,
+  name = c("Ali", "Veli", "Ayşe", "Fatma", "Mehmet"),
+  age = c(23, 45, 30, 19, 22),
+  salary = c(3000, 4000, 2500, 3500, 2800),
+  stringsAsFactors = FALSE
+)
+
+# data.frame'i inceleme
+print(df2)
+str(df2)
+```
+
+**Güçlü Yanları:**
+
+-   **Esneklik**: Her sütun farklı bir veri tipine sahip olabilir (sayısal, karakter, mantıksal, vb.).
+-   **Geniş Kullanım**: R'ın temel yapısı olduğu için birçok fonksiyon ve paket `data.frame` ile uyumludur.
+-   **Manipülasyon Kolaylığı**: Satır ve sütun bazında kolayca manipüle edilebilir.
+
+**Kullanım Yerleri:**
+
+-   Temel veri analizi ve manipülasyonu.
+-   R'ın temel fonksiyonlarıyla çalışırken (örneğin, `lm()` ile lineer regresyon).
+
+### tibble
+
+`tibble`, `data.frame`'in modern bir alternatifidir ve `tidyverse` paket koleksiyonunun bir parçasıdır. `data.frame`'e göre daha kullanıcı dostu ve tutarlı bir yapı sunar.
+
+```{r tibble2}
+# tibble oluşturma
+
+tb2 <- tibble(
+  id = 1:5,
+  name = c("Ali", "Veli", "Ayşe", "Fatma", "Mehmet"),
+  age = c(23, 45, 30, 19, 22),
+  salary = c(3000, 4000, 2500, 3500, 2800)
+)
+
+# tibble'ı inceleme
+print(tb2)
+str(tb2)
+```
+
+**Güçlü Yanları:**\
+- **Okunabilirlik**: Büyük veri setlerini konsolda daha okunabilir şekilde gösterir (ilk 10 satırı gösterir).\
+- **Tutarlılık**: `data.frame`'e göre daha tutarlı davranışlar sergiler (örneğin, otomatik sütun ismi düzeltme).\
+- **Modern Fonksiyonlar**: `dplyr` ve `tidyr` gibi `tidyverse` paketleriyle tam uyumludur.\
+
+**Kullanım Yerleri:**\
+- `tidyverse` paketleriyle çalışırken.\
+- Büyük veri setleri üzerinde çalışırken.\
+- Veri manipülasyonu ve temizleme işlemlerinde.\
+
+### list
+
+`list`, farklı veri tiplerini ve yapılarını bir arada tutabilen esnek bir veri yapısıdır. Her eleman farklı bir veri tipine veya yapısına sahip olabilir.
+
+```{r list2}
+# list oluşturma
+my_list2 <- list(
+  name = "Ali",
+  age = 23,
+  scores = c(85, 90, 78),
+  details = list(city = "Ankara", country = "Turkey")
+)
+
+# list'i inceleme
+print(my_list2)
+str(my_list2)
+```
+
+**Güçlü Yanları:**\
+- **Esneklik**: Farklı veri tiplerini ve yapılarını bir arada tutabilir.\
+- **Hiyerarşik Yapı**: İç içe listeler oluşturarak karmaşık veri yapılarını temsil edebilir.\
+- **Geniş Kullanım**: Özellikle JSON veya XML gibi hiyerarşik veri yapılarıyla çalışırken kullanışlıdır.\
+
+**Kullanım Yerleri:**\
+- Farklı veri tiplerini bir arada tutmak gerektiğinde.\
+- JSON veya XML gibi hiyerarşik veri yapılarını temsil ederken.\
+- Fonksiyonlardan birden fazla çıktı döndürülürken.\
+
+data.frame, tibble ve liste karşılaştırma ve özet
+
++-------------------+-----------------------------------+-----------------------------------+---------------------------------------+
+| Özellik           | `data.frame`                      | `tibble`                          | `list`                                |
++===================+===================================+===================================+=======================================+
+| **Esneklik**      | Sütunlar farklı tiplerde olabilir | Sütunlar farklı tiplerde olabilir | Her eleman farklı tip/yapıda olabilir |
++-------------------+-----------------------------------+-----------------------------------+---------------------------------------+
+| **Okunabilirlik** | Büyük veri setlerinde zor         | Büyük veri setlerinde daha iyi    | Karmaşık yapılar okunabilir           |
++-------------------+-----------------------------------+-----------------------------------+---------------------------------------+
+| **Manipülasyon**  | Temel R fonksiyonlarıyla uyumlu   | `tidyverse` ile uyumlu            | Esnek, ancak manipülasyon zor         |
++-------------------+-----------------------------------+-----------------------------------+---------------------------------------+
+| **Kullanım Yeri** | Temel analizler                   | Modern veri analizi ve temizleme  | Karmaşık ve hiyerarşik veriler        |
++-------------------+-----------------------------------+-----------------------------------+---------------------------------------+
+
+**Tüm Yapıların Bir Arada Kullanımı** Aşağıdaki örnekte, `data.frame`, `tibble` ve `list` yapılarını bir arada kullanıyoruz:
+
+```{r kullanım}
+# data.frame oluşturma
+df <- data.frame(
+  id = 1:3,
+  name = c("Ali", "Veli", "Ayşe"),
+  age = c(23, 45, 30)
+)
+
+# tibble oluşturma
+library(tibble)
+tb <- tibble(
+  id = 4:6,
+  name = c("Fatma", "Mehmet", "Zeynep"),
+  age = c(19, 22, 29)
+)
+
+# list oluşturma
+my_list <- list(
+  data_frame = df,
+  tibble = tb,
+  description = "Bu bir örnek listedir."
+)
+
+# Listeyi inceleme
+print(my_list)
+str(my_list)
+```
+
+Bu örnekte, `data.frame` ve `tibble` yapılarını bir `list` içinde birleştirerek karmaşık bir veri yapısı oluşturduk. Bu tür yapılar, özellikle farklı veri kaynaklarını bir arada tutmak gerektiğinde kullanışlıdır.
+
+### Özet
+
+-   **`data.frame`**: Temel veri analizi için uygun, geniş kullanım alanına sahip.
+-   **`tibble`**: Modern veri analizi ve manipülasyonu için ideal, özellikle `tidyverse` ile çalışırken.
+-   **`list`**: Esnek ve hiyerarşik veri yapıları için kullanışlı, karmaşık verileri temsil etmek için ideal.
+
+Bu veri yapılarını doğru şekilde kullanarak, R'da veri analizi ve manipülasyonu süreçlerinizi daha verimli hale getirebilirsiniz.
+
+# 2.4 Veri Temizleme
+
+## Giriş
+
+R dilinde veri temizleme adımlarını eksik değerlerin tespiti ve yönetimi, aykırı değerlerin tespiti, veri tiplerinin dönüştürülmesi, format ayarlamaları ve dönüşümler ile filtreleme işlemlerini içeren bir veri temizleme sürecini adım adım gerçekleştireceğiz.
+
+## Örnek Veri Seti
+
+Öncelikle, örnek bir veri seti oluşturalım:
+
+```{r kütüphane}
+# Gerekli kütüphaneleri yükleme
+library(dplyr)
+library(tidyr)
+
+# Örnek veri seti oluşturma
+set.seed(123)
+data <- data.frame(
+  id = 1:10,
+  name = c("Ali", "Veli", NA, "Ayse", "Fatma", "Mehmet", "Zeynep", "Ahmet", "Huseyin", "Mustafa"),
+  age = c(23, 45, 30, NA, 19, 22, 29, 35, 50, 100),
+  salary = c(3000, 4000, 2500, 3500, NA, 2800, 3200, 4500, 5000, 10000),
+  gender = c("M", "M", "F", "F", "F", "M", "F", "M", "M", "M"),
+  V1 = c(NA, NA, 1, 2, 3, NA, 1, NA, NA, NA),
+  V2 = c(NA, 0, NA, 1, 1, 2, 2, 2, 0, 1),
+  stringsAsFactors = FALSE
+)
+
+print(data)
+```
+
+Bu veri setinde:\
+- `id`: Benzersiz kimlik numarası\
+- `name`: Kişi ismi\
+- `age`: Yaş\
+- `salary`: Maaş\
+- `gender`: Cinsiyet\
+- `V1`: Bilinmeyen bir veri
+
+## Eksik Değerlerin Tespiti ve Yönetimi
+
+Eksik değerleri tespit etmek için `is.na()` fonksiyonunu kullanabiliriz. Eksik değerleri doldurmak veya kaldırmak için çeşitli yöntemler uygulayabiliriz.
+
+```{r eksik değer}
+# Eksik değerleri tespit etme
+sum(is.na(data))
+
+# Her sütundaki eksik değer sayısını bulma
+colSums(is.na(data))
+
+# Eksik değerleri ortalama ile doldurma (örneğin yaş için)
+data$age[is.na(data$age)] <- mean(data$age, na.rm = TRUE)
+
+# Eksik değerleri kaldırma (örneğin maaş için)
+data <- data %>% drop_na(salary)
+
+# Eksik değerleri medyan ile doldurma (örneğin V1 ve V2 için)
+data$V1[is.na(data$V1)] <- median(data$V1, na.rm = TRUE)
+data$V2[is.na(data$V2)] <- median(data$V2, na.rm = TRUE)
+
+print(data)
+```
+
+## Tamamen Rastgele Eksik Değer
+
+```{r}
+# Load required libraries
+library(naniar) # For missing data visualization
+library(missForest) # For statistical MCAR test
+library(MissMech)
+
+# Define the dataset
+data <- data.frame(
+  id = 1:14,
+  name = c("Ali", "Veli", "Canan", "Ayşe", "Fatma", 
+           "Mehmet", "Zeynep", "Ahmet", "Hüseyin", 
+           "Mustafa", "Seyran", "Suna", "Defne", "Su"),
+  age = c(23, 45, 30, 25, 19, 22, 29, 
+          35, 25, 20, 25, 26, 20, 21),
+  salary = c(3000, 4000, 2500, 3500, 3000, 2800, 3200, 
+             4500, 5000, 4000, 5000, 2700,3100,3000),
+  gender = c("M", "M", "F", "F", "F", "M", "F", 
+             "M", "M", "M","F", "F","F", "F"),
+  V1 = c(NA, NA, 1, 2, 3, NA, 1, 0, 0, 0, 1, 1, 2, 2),
+  V2 = c(NA, NA, NA, 1, 1, 2, 2, 2, 0, 1, 1, 1, 2, NA),
+  stringsAsFactors = FALSE
+)
+
+# Convert gender to numeric (M = 0, F = 1)
+data$gender <- ifelse(data$gender == "M", 0, 1)
+numeric_data <- data %>% select(-name)
+
+# 1. Visualizing Missing Data
+vis_miss(data)
+
+# 2. Little's MCAR Test (Checks if missingness is completely random)
+print(TestMCARNormality(numeric_data,del.lesscases = 1))
+
+#mcar_test_result <- missForest::prodNA(data, noNA = 0) # No additional NA, just to ensure format
+#print(MissMech::TestMCARNormality(mcar_test_result))
+
+# 3. Checking for MAR (Correlation of missingness with other variables)
+missing_V1 <- is.na(data$V1)
+summary(lm(missing_V1 ~ age + salary + gender, data = data)) # If significant, suggests MAR
+
+missing_V2 <- is.na(data$V2)
+summary(lm(missing_V2 ~ age + salary + gender, data = data)) # If significant, suggests MAR
+
+# 4. Checking for MNAR (Pattern of missingness in V1 itself)
+boxplot(age ~ missing_V1, data = data, main = "Age Distribution by Missingness in V1")
+boxplot(salary ~ missing_V1, data = data, main = "Salary Distribution by Missingness in V1")
+boxplot(gender ~ missing_V1, data = data, main = "Gender Distribution by Missingness in V1")
+
+boxplot(age ~ missing_V2, data = data, main = "Age Distribution by Missingness in V2")
+boxplot(salary ~ missing_V2, data = data, main = "Salary Distribution by Missingness in V2")
+boxplot(gender ~ missing_V2, data = data, main = "Gender Distribution by Missingness in V2")
+
+```
+
+## Aykırı Değerlerin Tespiti ve Yönetimi
+
+Aykırı değerleri tespit etmek için kutu grafiği (boxplot) veya istatistiksel yöntemler kullanabiliriz. Örneğin, yaş sütunundaki aykırı değerleri tespit edelim.
+
+```{r aykırı değer}
+# Yaş sütunu için kutu grafiği
+boxplot(data$age, main="Yaş Dağılımı")
+
+# Aykırı değerleri tespit etme
+Q1 <- quantile(data$age, 0.25)
+Q3 <- quantile(data$age, 0.75)
+IQR <- Q3 - Q1
+
+lower_bound <- Q1 - 1.5 * IQR
+upper_bound <- Q3 + 1.5 * IQR
+
+outliers <- data$age < lower_bound | data$age > upper_bound
+data$age[outliers] <- NA  # Aykırı değerleri NA ile değiştirme
+
+# Aykırı değerleri kaldırma
+data <- data %>% drop_na(age)
+
+print(data)
+```
+
+## Veri Tiplerinin Dönüştürülmesi ve Biçim Ayarlamaları
+
+Veri tiplerini dönüştürmek ve format ayarlamaları yapmak için `as.` fonksiyonlarını kullanabiliriz. Örneğin, cinsiyet sütununu faktör tipine dönüştürelim.
+
+```{r Tip dönüştürme}
+# Cinsiyet sütununu faktör tipine dönüştürme
+data$gender <- as.factor(data$gender)
+
+# Veri tiplerini kontrol etme
+str(data)
+```
+
+## Dönüşümler ve Filtreleme İşlemleri (dplyr ile)
+
+`dplyr` paketi ile veri dönüşümleri ve filtreleme işlemleri yapabiliriz. Örneğin, belirli bir yaş aralığındaki kişileri filtreleyelim ve maaşlarını artıralım.
+
+```{r dplyr}
+# Yaşı 20 ile 40 arasında olan kişileri filtreleme
+filtered_data <- data %>% filter(age >= 20 & age <= 40)
+
+# Maaşları %10 artırma
+filtered_data <- filtered_data %>% mutate(salary = salary * 1.10)
+
+print(filtered_data)
+```
+
+## Sonuç
+
+Bu adımlarla, R dilinde veri temizleme sürecini detaylı bir şekilde gerçekleştirdik. Eksik değerlerin tespiti ve yönetimi, aykırı değerlerin tespiti, veri tiplerinin dönüştürülmesi ve format ayarlamaları, dönüşümler ve filtreleme işlemleri gibi temel veri temizleme tekniklerini uyguladık. Bu adımlar, veri analizi sürecinde veri kalitesini artırmak için oldukça önemlidir.
