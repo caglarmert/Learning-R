@@ -58,49 +58,49 @@ options(warn=-1)
 
 # 1.1 R dilinin veri analizinde kullanımı ve avantajları
 
-+---------------+---------------------------+-----------------------------+
-| Araç          | Güçlü Yanları             | Olumsuz Özellikleri         |
-+:==============+:==========================+:============================+
-| Excel         | Çok kolay kullanım        | Maliyetli                   |
-|               |                           |                             |
-|               | Basit arayüz              | Yavaş                       |
-|               |                           |                             |
-|               |                           | Bir şirkete bağlı           |
-|               |                           |                             |
-|               |                           | Kapalı kaynak               |
-|               |                           |                             |
-|               |                           | Çok kısıtlı programlama     |
-+---------------+---------------------------+-----------------------------+
-| Matlab        | Şirket desteği            | Çok maliyetli               |
-|               |                           |                             |
-|               | Kolay kullanım            | Yavaş                       |
-|               |                           |                             |
-|               | Dokümantasyon             | Bir şirkete bağlı           |
-|               |                           |                             |
-|               | Arayüz                    | Kısmen kapalı kaynak        |
-|               |                           |                             |
-|               |                           | Kısıtlı programlama         |
-+---------------+---------------------------+-----------------------------+
-| Python        | Açık kaynak topluluğu     | Açık kaynak topluluğu       |
-|               |                           |                             |
-|               | Ücretsiz                  | Geliştirme ortamı sorunları |
-|               |                           |                             |
-|               | Çok geniş kullanım alanı  | Sadece topluluk desteği     |
-|               |                           |                             |
-|               | Yapay Zeka                | Dokümantasyon               |
-|               |                           |                             |
-|               | Topluluk destekli arayüz  |                             |
-+---------------+---------------------------+-----------------------------+
-| R             | Açık kaynak topluluğu     | Sadece topluluk desteği     |
-|               |                           |                             |
-|               | Ücretsiz                  | Kısıtlı kullanım alanı      |
-|               |                           |                             |
-|               | İstatistik ve veri bilimi |                             |
-|               |                           |                             |
-|               | Dokümantasyon             |                             |
-|               |                           |                             |
-|               | Topluluk destekli arayüz  |                             |
-+---------------+---------------------------+-----------------------------+
++----------------+---------------------------+-----------------------------+
+| Araç           | Güçlü Yanları             | Olumsuz Özellikleri         |
++:===============+:==========================+:============================+
+| Excel          | Çok kolay kullanım        | Maliyetli                   |
+|                |                           |                             |
+|                | Basit arayüz              | Yavaş                       |
+|                |                           |                             |
+|                |                           | Bir şirkete bağlı           |
+|                |                           |                             |
+|                |                           | Kapalı kaynak               |
+|                |                           |                             |
+|                |                           | Çok kısıtlı programlama     |
++----------------+---------------------------+-----------------------------+
+| Matlab         | Şirket desteği            | Çok maliyetli               |
+|                |                           |                             |
+|                | Kolay kullanım            | Yavaş                       |
+|                |                           |                             |
+|                | Dokümantasyon             | Bir şirkete bağlı           |
+|                |                           |                             |
+|                | Arayüz                    | Kısmen kapalı kaynak        |
+|                |                           |                             |
+|                |                           | Kısıtlı programlama         |
++----------------+---------------------------+-----------------------------+
+| Python         | Açık kaynak topluluğu     | Açık kaynak topluluğu       |
+|                |                           |                             |
+|                | Ücretsiz                  | Geliştirme ortamı sorunları |
+|                |                           |                             |
+|                | Çok geniş kullanım alanı  | Sadece topluluk desteği     |
+|                |                           |                             |
+|                | Yapay Zeka                | Dokümantasyon               |
+|                |                           |                             |
+|                | Topluluk destekli arayüz  |                             |
++----------------+---------------------------+-----------------------------+
+| R              | Açık kaynak topluluğu     | Sadece topluluk desteği     |
+|                |                           |                             |
+|                | Ücretsiz                  | Kısıtlı kullanım alanı      |
+|                |                           |                             |
+|                | İstatistik ve veri bilimi |                             |
+|                |                           |                             |
+|                | Dokümantasyon             |                             |
+|                |                           |                             |
+|                | Topluluk destekli arayüz  |                             |
++----------------+---------------------------+-----------------------------+
 
 # 1.2 RStudio Arayüzü
 
@@ -144,15 +144,15 @@ R programlama dili, genellikle istatistiksel hesaplamalar ve veri analizi için 
 
 ## Sınıf Oluşturma
 
-Bir liste oluştur ve sınıf ismini "kişi" olarak ata
+Bir liste oluştur ve sınıf ismini "kisi" olarak ata
 
 ```{r Sınıf oluşturma, echo = TRUE}
-# Bir liste oluştur ve sınıf ismini "kişi" olarak ata
-kişi <- list(adı = "Ali", yaşı = 30)
-class(kişi) <- "kişi"
+# Bir liste oluştur ve sınıf ismini "kisi" olarak ata
+kisi <- list(adi = "Ali", yasi = 30)
+class(kisi) <- "kisi"
 
 # Sınıfı kontrol et
-class(kişi)
+class(kisi)
 ```
 
 ## Metod Tanımlama
@@ -161,26 +161,26 @@ print metodunu person sınıfı için özelleştir
 
 ```{r metod tanımlama, echo = TRUE}
 # print metodunu person sınıfı için özelleştir
-print.kişi <- function(nesne) {
-  cat("Adı:", nesne$adı, "\n")
-  cat("Yaşı:", nesne$yaşı, "\n")
+print.kisi <- function(nesne) {
+  cat("adi:", nesne$adi, "\n")
+  cat("yasi:", nesne$yasi, "\n")
 }
 
 # print fonksiyonunu çağır
-print(kişi)
+print(kisi)
 ```
 
 ## Yeni Nesne Oluşturma
 
-Yeni bir kişi nesnesi oluştur, var olan kişi nesnesinin fonksiyonu bu nesnede de geçerli olur.(Inheritance-Miras)
+Yeni bir kisi nesnesi oluştur, var olan kisi nesnesinin fonksiyonu bu nesnede de geçerli olur.(Inheritance-Miras)
 
 ```{r yeni nesne, echo = TRUE}
-# Yeni bir kişi nesnesi oluştur
-yeni_kişi <- list(adı = "Ayşe", yaşı = 25)
-class(yeni_kişi) <- "kişi"
+# Yeni bir kisi nesnesi oluştur
+yeni_kisi <- list(adi = "Ayşe", yasi = 25)
+class(yeni_kisi) <- "kisi"
 
 # print metodunu çağır
-print(yeni_kişi)
+print(yeni_kisi)
 ```
 
 ## Yardım
@@ -450,7 +450,16 @@ ggplot(mtcars, aes(x = mpg)) +
 
 ```{r}
 # Correlation matrix
-cor(mtcars)
+
+# Load the package
+library(corrplot)
+
+# Compute correlation matrix
+cor_matrix <- cor(mtcars)
+
+# Visualize the correlation matrix
+corrplot(cor_matrix, method = "color", type = "upper", tl.cex = 0.8, col = colorRampPalette(c("blue", "white", "red"))(200))
+
 
 # Linear regression model: mpg as a function of hp and wt
 model <- lm(mpg ~ hp + wt, data = mtcars)
@@ -470,7 +479,7 @@ write_csv(mtcars, "cleaned_mtcars.csv")
 
 ### Raporlama ve sunuş
 
-R markdon ile dinamik raporlama yapabilir, kod, görselleştirme ve analizleri bir arada sunabilirsiniz.
+R markdown ile dinamik raporlama yapabilir, kod, görselleştirme ve analizleri bir arada sunabilirsiniz.
 
 # 2. Veri İçe Aktarma ve Temizleme
 
@@ -1056,7 +1065,7 @@ df <- data.frame(
 # Elemanlara erişim
 df$Name  # Tüm isimleri alır
 df[2, ]  # 2. satırı alır
-df[df$Age > 25, ]  # Yaşı 25'ten büyük olanları filtreler
+df[df$Age > 25, ]  # yasi 25'ten büyük olanları filtreler
 ```
 
 **Kullanım Yerleri ve Güçlü Yanları:**\
@@ -1090,7 +1099,7 @@ tb <- tibble(
 # Elemanlara erişim
 tb$Name  # Tüm isimleri alır
 tb[2, ]  # 2. satırı alır
-tb %>% filter(Age > 25)  # Yaşı 25'ten büyük olanları filtreler
+tb %>% filter(Age > 25)  # yasi 25'ten büyük olanları filtreler
 ```
 
 **Kullanım Yerleri ve Güçlü Yanları:**\
@@ -1101,23 +1110,23 @@ tb %>% filter(Age > 25)  # Yaşı 25'ten büyük olanları filtreler
 
 ## Özet
 
-+---------------------------------+-------------+-------------+--------------------------------------------------+
-| Veri Yapısı                     | Boyut       | Veri Türü   | Kullanım Alanları                                |
-+=================================+=============+=============+==================================================+
-| **Vektör**                      | 1D          | Tek tip     | Basit diziler, matematiksel işlemler             |
-+---------------------------------+-------------+-------------+--------------------------------------------------+
-| **Matris**                      | 2D          | Tek tip     | Doğrusal cebir, matematiksel hesaplamalar        |
-+---------------------------------+-------------+-------------+--------------------------------------------------+
-| **Dizi (Array)**                | 3D+         | Tek tip     | Çok boyutlu veri analizi                         |
-+---------------------------------+-------------+-------------+--------------------------------------------------+
-| **Faktör (Factor)**             | 1D          | Kategorik   | Kategorik veri analizi                           |
-+---------------------------------+-------------+-------------+--------------------------------------------------+
-| **Liste (List)**                | 1D          | Farklı tip  | Karmaşık veri yapıları                           |
-+---------------------------------+-------------+-------------+--------------------------------------------------+
-| **Veri Çerçevesi (Data Frame)** | 2D          | Farklı tip  | Veri analizi, istatistik                         |
-+---------------------------------+-------------+-------------+--------------------------------------------------+
-| **Tibble**                      | 2D          | Farklı tip  | Tidyverse ile veri analizi, büyük veri işlemleri |
-+---------------------------------+-------------+-------------+--------------------------------------------------+
++---------------------------------+------------+------------+--------------------------------------------------+
+| Veri Yapısı                     | Boyut      | Veri Türü  | Kullanım Alanları                                |
++=================================+============+============+==================================================+
+| **Vektör**                      | 1D         | Tek tip    | Basit diziler, matematiksel işlemler             |
++---------------------------------+------------+------------+--------------------------------------------------+
+| **Matris**                      | 2D         | Tek tip    | Doğrusal cebir, matematiksel hesaplamalar        |
++---------------------------------+------------+------------+--------------------------------------------------+
+| **Dizi (Array)**                | 3D+        | Tek tip    | Çok boyutlu veri analizi                         |
++---------------------------------+------------+------------+--------------------------------------------------+
+| **Faktör (Factor)**             | 1D         | Kategorik  | Kategorik veri analizi                           |
++---------------------------------+------------+------------+--------------------------------------------------+
+| **Liste (List)**                | 1D         | Farklı tip | Karmaşık veri yapıları                           |
++---------------------------------+------------+------------+--------------------------------------------------+
+| **Veri Çerçevesi (Data Frame)** | 2D         | Farklı tip | Veri analizi, istatistik                         |
++---------------------------------+------------+------------+--------------------------------------------------+
+| **Tibble**                      | 2D         | Farklı tip | Tidyverse ile veri analizi, büyük veri işlemleri |
++---------------------------------+------------+------------+--------------------------------------------------+
 
 ## data.frame
 
@@ -1266,7 +1275,7 @@ Bu veri yapılarını doğru şekilde kullanarak, R'da veri analizi ve manipüla
 
 ## Giriş
 
-R dilinde veri temizleme adımlarını eksik değerlerin tespiti ve yönetimi, aykırı değerlerin tespiti, veri tiplerinin dönüştürülmesi, format ayarlamaları ve dönüşümler ile filtreleme işlemlerini içeren bir veri temizleme sürecini adım adım gerçekleştireceğiz.
+R dilinde veri temizleme adimlarını eksik değerlerin tespiti ve yönetimi, aykırı değerlerin tespiti, veri tiplerinin dönüştürülmesi, format ayarlamaları ve dönüşümler ile filtreleme işlemlerini içeren bir veri temizleme sürecini adim adim gerçekleştireceğiz.
 
 ## Örnek Veri Seti
 
@@ -1295,7 +1304,7 @@ print(data)
 
 Bu veri setinde:\
 - `id`: Benzersiz kimlik numarası\
-- `name`: Kişi ismi\
+- `name`: kisi ismi\
 - `age`: Yaş\
 - `salary`: Maaş\
 - `gender`: Cinsiyet\
@@ -1420,10 +1429,10 @@ str(data)
 
 ## Dönüşümler ve Filtreleme İşlemleri (dplyr ile)
 
-`dplyr` paketi ile veri dönüşümleri ve filtreleme işlemleri yapabiliriz. Örneğin, belirli bir yaş aralığındaki kişileri filtreleyelim ve maaşlarını artıralım.
+`dplyr` paketi ile veri dönüşümleri ve filtreleme işlemleri yapabiliriz. Örneğin, belirli bir yaş aralığındaki kisileri filtreleyelim ve maaşlarını artıralım.
 
 ```{r dplyr}
-# Yaşı 20 ile 40 arasında olan kişileri filtreleme
+# yasi 20 ile 40 arasında olan kisileri filtreleme
 filtered_data <- data %>% filter(age >= 20 & age <= 40)
 
 # Maaşları %10 artırma
@@ -1434,4 +1443,4 @@ print(filtered_data)
 
 ## Sonuç
 
-Bu adımlarla, R dilinde veri temizleme sürecini detaylı bir şekilde gerçekleştirdik. Eksik değerlerin tespiti ve yönetimi, aykırı değerlerin tespiti, veri tiplerinin dönüştürülmesi ve format ayarlamaları, dönüşümler ve filtreleme işlemleri gibi temel veri temizleme tekniklerini uyguladık. Bu adımlar, veri analizi sürecinde veri kalitesini artırmak için oldukça önemlidir.
+Bu adimlarla, R dilinde veri temizleme sürecini detaylı bir şekilde gerçekleştirdik. Eksik değerlerin tespiti ve yönetimi, aykırı değerlerin tespiti, veri tiplerinin dönüştürülmesi ve format ayarlamaları, dönüşümler ve filtreleme işlemleri gibi temel veri temizleme tekniklerini uyguladik. Bu adimlar, veri analizi sürecinde veri kalitesini artırmak için oldukça önemlidir.
