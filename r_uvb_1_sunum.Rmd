@@ -58,49 +58,49 @@ options(warn=-1)
 
 # 1.1 R dilinin veri analizinde kullanımı ve avantajları
 
-+----------------+---------------------------+-----------------------------+
-| Araç           | Güçlü Yanları             | Olumsuz Özellikleri         |
-+:===============+:==========================+:============================+
-| Excel          | Çok kolay kullanım        | Maliyetli                   |
-|                |                           |                             |
-|                | Basit arayüz              | Yavaş                       |
-|                |                           |                             |
-|                |                           | Bir şirkete bağlı           |
-|                |                           |                             |
-|                |                           | Kapalı kaynak               |
-|                |                           |                             |
-|                |                           | Çok kısıtlı programlama     |
-+----------------+---------------------------+-----------------------------+
-| Matlab         | Şirket desteği            | Çok maliyetli               |
-|                |                           |                             |
-|                | Kolay kullanım            | Yavaş                       |
-|                |                           |                             |
-|                | Dokümantasyon             | Bir şirkete bağlı           |
-|                |                           |                             |
-|                | Arayüz                    | Kısmen kapalı kaynak        |
-|                |                           |                             |
-|                |                           | Kısıtlı programlama         |
-+----------------+---------------------------+-----------------------------+
-| Python         | Açık kaynak topluluğu     | Açık kaynak topluluğu       |
-|                |                           |                             |
-|                | Ücretsiz                  | Geliştirme ortamı sorunları |
-|                |                           |                             |
-|                | Çok geniş kullanım alanı  | Sadece topluluk desteği     |
-|                |                           |                             |
-|                | Yapay Zeka                | Dokümantasyon               |
-|                |                           |                             |
-|                | Topluluk destekli arayüz  |                             |
-+----------------+---------------------------+-----------------------------+
-| R              | Açık kaynak topluluğu     | Sadece topluluk desteği     |
-|                |                           |                             |
-|                | Ücretsiz                  | Kısıtlı kullanım alanı      |
-|                |                           |                             |
-|                | İstatistik ve veri bilimi |                             |
-|                |                           |                             |
-|                | Dokümantasyon             |                             |
-|                |                           |                             |
-|                | Topluluk destekli arayüz  |                             |
-+----------------+---------------------------+-----------------------------+
++--------+---------------------------+-----------------------------+
+| Araç   | Güçlü Yanları             | Olumsuz Özellikleri         |
++:=======+:==========================+:============================+
+| Excel  | Çok kolay kullanım        | Maliyetli                   |
+|        |                           |                             |
+|        | Basit arayüz              | Yavaş                       |
+|        |                           |                             |
+|        |                           | Bir şirkete bağlı           |
+|        |                           |                             |
+|        |                           | Kapalı kaynak               |
+|        |                           |                             |
+|        |                           | Çok kısıtlı programlama     |
++--------+---------------------------+-----------------------------+
+| Matlab | Şirket desteği            | Çok maliyetli               |
+|        |                           |                             |
+|        | Kolay kullanım            | Yavaş                       |
+|        |                           |                             |
+|        | Dokümantasyon             | Bir şirkete bağlı           |
+|        |                           |                             |
+|        | Arayüz                    | Kısmen kapalı kaynak        |
+|        |                           |                             |
+|        |                           | Kısıtlı programlama         |
++--------+---------------------------+-----------------------------+
+| Python | Açık kaynak topluluğu     | Açık kaynak topluluğu       |
+|        |                           |                             |
+|        | Ücretsiz                  | Geliştirme ortamı sorunları |
+|        |                           |                             |
+|        | Çok geniş kullanım alanı  | Sadece topluluk desteği     |
+|        |                           |                             |
+|        | Yapay Zeka                | Dokümantasyon               |
+|        |                           |                             |
+|        | Topluluk destekli arayüz  |                             |
++--------+---------------------------+-----------------------------+
+| R      | Açık kaynak topluluğu     | Sadece topluluk desteği     |
+|        |                           |                             |
+|        | Ücretsiz                  | Kısıtlı kullanım alanı      |
+|        |                           |                             |
+|        | İstatistik ve veri bilimi |                             |
+|        |                           |                             |
+|        | Dokümantasyon             |                             |
+|        |                           |                             |
+|        | Topluluk destekli arayüz  |                             |
++--------+---------------------------+-----------------------------+
 
 # 1.2 RStudio Arayüzü
 
@@ -233,29 +233,24 @@ print(yeni_kisi)
 
 ## Atama
 
-+---------------+-----------------------+
-| **Operatör**  | **Tanım**             |
-+---------------+-----------------------+
-| `x <- 1`      | x'e bir değişken atar |
-|               |                       |
-| `x = 1`       |                       |
-+---------------+-----------------------+
++--------------+-----------------------+
+| **Operatör** | **Tanım**             |
++--------------+-----------------------+
+| `x <- 1`     | x'e bir değişken atar |
+|              |                       |
+| `x = 1`      |                       |
++--------------+-----------------------+
 
 ## Vektör
 
-+----------------------+-------------------+-------------------------------------------------------------------------------------------------------+
-| **Giriş**            | **Çıktı**         | **Tanım**                                                                                             |
-+----------------------+-------------------+-------------------------------------------------------------------------------------------------------+
-| `c(1,3,5)`           | `1 3 5`           | Virgülle ayrılmış öğeleri kullanarak bir vektör oluşturur                                             |
-+----------------------+-------------------+-------------------------------------------------------------------------------------------------------+
-| `1:7`                | `1 2 3 4 5 6 7`   | İki sayı arasında tam sayılardan oluşan bir vektör oluşturur                                          |
-+----------------------+-------------------+-------------------------------------------------------------------------------------------------------+
-| `seq(2,8,by = 2)`    | `2 4 6 8`         | İki sayı arasında, her bir eleman arasında belirtilen bir aralık olacak şekilde bir vektör oluşturur. |
-+----------------------+-------------------+-------------------------------------------------------------------------------------------------------+
-| `rep(2,8,times = 4)` | `2 8 2 8 2 8 2 8` | Belirli sayıda tekrarlanan verilen elemanlardan oluşan bir vektör oluşturur.                          |
-+----------------------+-------------------+-------------------------------------------------------------------------------------------------------+
-| `rep(2,8,each = 3)`  | `2 2 2 8 8 8`     | Verilen öğelerin her birini belirli sayıda tekrarlayan bir vektör oluşturur.                          |
-+----------------------+-------------------+-------------------------------------------------------------------------------------------------------+
+|  |  |  |
+|----|----|----|
+| **Giriş** | **Çıktı** | **Tanım** |
+| `c(1,3,5)` | `1 3 5` | Virgülle ayrılmış öğeleri kullanarak bir vektör oluşturur |
+| `1:7` | `1 2 3 4 5 6 7` | İki sayı arasında tam sayılardan oluşan bir vektör oluşturur |
+| `seq(2,8,by = 2)` | `2 4 6 8` | İki sayı arasında, her bir eleman arasında belirtilen bir aralık olacak şekilde bir vektör oluşturur. |
+| `rep(2,8,times = 4)` | `2 8 2 8 2 8 2 8` | Belirli sayıda tekrarlanan verilen elemanlardan oluşan bir vektör oluşturur. |
+| `rep(2,8,each = 3)` | `2 2 2 8 8 8` | Verilen öğelerin her birini belirli sayıda tekrarlayan bir vektör oluşturur. |
 
 ## Vektör Fonksiyonları
 
@@ -1110,23 +1105,15 @@ tb %>% filter(Age > 25)  # yasi 25'ten büyük olanları filtreler
 
 ## Özet
 
-+---------------------------------+------------+------------+--------------------------------------------------+
-| Veri Yapısı                     | Boyut      | Veri Türü  | Kullanım Alanları                                |
-+=================================+============+============+==================================================+
-| **Vektör**                      | 1D         | Tek tip    | Basit diziler, matematiksel işlemler             |
-+---------------------------------+------------+------------+--------------------------------------------------+
-| **Matris**                      | 2D         | Tek tip    | Doğrusal cebir, matematiksel hesaplamalar        |
-+---------------------------------+------------+------------+--------------------------------------------------+
-| **Dizi (Array)**                | 3D+        | Tek tip    | Çok boyutlu veri analizi                         |
-+---------------------------------+------------+------------+--------------------------------------------------+
-| **Faktör (Factor)**             | 1D         | Kategorik  | Kategorik veri analizi                           |
-+---------------------------------+------------+------------+--------------------------------------------------+
-| **Liste (List)**                | 1D         | Farklı tip | Karmaşık veri yapıları                           |
-+---------------------------------+------------+------------+--------------------------------------------------+
-| **Veri Çerçevesi (Data Frame)** | 2D         | Farklı tip | Veri analizi, istatistik                         |
-+---------------------------------+------------+------------+--------------------------------------------------+
-| **Tibble**                      | 2D         | Farklı tip | Tidyverse ile veri analizi, büyük veri işlemleri |
-+---------------------------------+------------+------------+--------------------------------------------------+
+| Veri Yapısı | Boyut | Veri Türü | Kullanım Alanları |
+|----|----|----|----|
+| **Vektör** | 1D | Tek tip | Basit diziler, matematiksel işlemler |
+| **Matris** | 2D | Tek tip | Doğrusal cebir, matematiksel hesaplamalar |
+| **Dizi (Array)** | 3D+ | Tek tip | Çok boyutlu veri analizi |
+| **Faktör (Factor)** | 1D | Kategorik | Kategorik veri analizi |
+| **Liste (List)** | 1D | Farklı tip | Karmaşık veri yapıları |
+| **Veri Çerçevesi (Data Frame)** | 2D | Farklı tip | Veri analizi, istatistik |
+| **Tibble** | 2D | Farklı tip | Tidyverse ile veri analizi, büyük veri işlemleri |
 
 ## data.frame
 
@@ -1219,17 +1206,12 @@ str(my_list2)
 
 data.frame, tibble ve liste karşılaştırma ve özet
 
-+-------------------+-----------------------------------+-----------------------------------+---------------------------------------+
-| Özellik           | `data.frame`                      | `tibble`                          | `list`                                |
-+===================+===================================+===================================+=======================================+
-| **Esneklik**      | Sütunlar farklı tiplerde olabilir | Sütunlar farklı tiplerde olabilir | Her eleman farklı tip/yapıda olabilir |
-+-------------------+-----------------------------------+-----------------------------------+---------------------------------------+
-| **Okunabilirlik** | Büyük veri setlerinde zor         | Büyük veri setlerinde daha iyi    | Karmaşık yapılar okunabilir           |
-+-------------------+-----------------------------------+-----------------------------------+---------------------------------------+
-| **Manipülasyon**  | Temel R fonksiyonlarıyla uyumlu   | `tidyverse` ile uyumlu            | Esnek, ancak manipülasyon zor         |
-+-------------------+-----------------------------------+-----------------------------------+---------------------------------------+
-| **Kullanım Yeri** | Temel analizler                   | Modern veri analizi ve temizleme  | Karmaşık ve hiyerarşik veriler        |
-+-------------------+-----------------------------------+-----------------------------------+---------------------------------------+
+| Özellik | `data.frame` | `tibble` | `list` |
+|----|----|----|----|
+| **Esneklik** | Sütunlar farklı tiplerde olabilir | Sütunlar farklı tiplerde olabilir | Her eleman farklı tip/yapıda olabilir |
+| **Okunabilirlik** | Büyük veri setlerinde zor | Büyük veri setlerinde daha iyi | Karmaşık yapılar okunabilir |
+| **Manipülasyon** | Temel R fonksiyonlarıyla uyumlu | `tidyverse` ile uyumlu | Esnek, ancak manipülasyon zor |
+| **Kullanım Yeri** | Temel analizler | Modern veri analizi ve temizleme | Karmaşık ve hiyerarşik veriler |
 
 **Tüm Yapıların Bir Arada Kullanımı** Aşağıdaki örnekte, `data.frame`, `tibble` ve `list` yapılarını bir arada kullanıyoruz:
 

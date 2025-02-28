@@ -1,0 +1,1285 @@
+---
+title: "R Uygulamalı Veri Bilimi"
+author: "Ümit Mert Çağlar"
+date: "`r Sys.Date()`"
+css: style.css
+output:
+  slidy_presentation: 
+    duration: 50
+    highlight: espresso
+  beamer_presentation: 
+    toc: true
+    theme: Singapore
+    colortheme: beaver
+    fonttheme: serif
+    highlight: pygments
+  ioslides_presentation: 
+    highlight: pygments
+    smaller: true
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+options(warn=-1)
+```
+
+# 5. İstatistik
+
+# 5.1 Giriş
+
+-   İşlem verileri üzerinde istatistiksel analiz yöntemleri ve raporlanabilir sonuçlar
+
+-   İstatistiksel analizler ve tanımlayıcı istatistikler
+
+-   Zaman serisi analizi: işlem verilerindeki trend ve mevsimsellik analizi
+
+-   Aykırı değer tespiti ve anomali analiz yöntemleri
+
+-   İki veya daha fazla veri seti arasındaki ilişki analizleri
+
+-   Hipotez testleri ve güven aralıkları ile verilerin değerlendirilmesi
+
+# 5.2 İstatistiksel Analiz
+
+## Ortalama, Medyan ve Çeyreklikler
+
+```{r}
+# Test dizisi oluşturma
+test_array <- c(10, 5, 7, 8, 124,9, 1, 11, 13)
+
+# Ortalama ve medyan hesaplama
+mean_value <- mean(test_array)
+median_value <- median(test_array)
+
+cat("Ortalama:", mean_value, "\n")
+cat("Medyan:", median_value, "\n")
+
+# Çeyrekliklerin hesaplanması
+q1 <- quantile(test_array, 0.25)
+q2 <- quantile(test_array, 0.50)
+q3 <- quantile(test_array, 0.75)
+q4 <- quantile(test_array, 1.00)
+
+cat("1. Çeyrek (%25):", q1, "\n")
+cat("2. Çeyrek (%50):", q2, "\n")
+cat("3. Çeyrek (%75):", q3, "\n")
+cat("4. Çeyrek (%100):", q4, "\n")
+```
+
+## Aykırı Değer Tespiti
+
+```{r}
+# IQR (Interquartile Range) hesaplama
+IQR_value <- q3 - q1
+lower_bound <- q1 - 1.5 * IQR_value
+upper_bound <- q3 + 1.5 * IQR_value
+
+cat("Bu sayıdan küçükse aykırı değer diyebiliriz:", lower_bound, "\n")
+cat("Bu sayıdan büyükse aykırı değer diyebiliriz:", upper_bound, "\n")
+```
+
+```{r}
+# Koşullara göre filtreleme yap
+filtered_array <- test_array[test_array >= 1 & test_array <= 17]
+
+# Sonucu yazdır
+print(filtered_array)
+
+# Ortalama ve medyan hesaplama
+mean_value_f <- mean(filtered_array)
+median_value_f <- median(filtered_array)
+
+cat("Ortalama:", mean_value_f, "\n")
+cat("Medyan:", median_value_f, "\n")
+
+```
+
+## Titanic Veri Seti
+
+Titanic veri seti, Titanic kazasında hayatta kalan ve yaşamayan yolcuların bilgilerini içeren bir veri setidir.
+
+```{r}
+# Titanic veri setini yükleme
+titanic <- read.csv("titanic_train.csv")
+
+# Veri setinin ilk 5 satırını görüntüleme
+head(titanic)
+
+```
+
+## Hayatta Kalanların Cinsiyete Göre Dağılımı
+
+```{r}
+# Hayatta kalanların cinsiyete göre dağılımı
+survived_gender <- table(titanic$Survived, titanic$Sex)
+colnames(survived_gender) <- c("Kadın", "Erkek")
+rownames(survived_gender) <- c("kurtulamadı", "Kurtuldu")
+
+print(survived_gender)
+
+```
+
+## Hayatta Kalanların Sınıfa Göre Dağılımı
+
+```{r}
+# Hayatta kalanların sınıfa göre dağılımı
+survived_class <- table(titanic$Survived, titanic$Pclass)
+colnames(survived_class) <- c("1. Sınıf", "2. Sınıf", "3. Sınıf")
+rownames(survived_class) <- c("kurtulamadı", "Kurtuldu")
+
+print(survived_class)
+
+```
+
+# 5.3 Zaman Serisi Analizleri
+
+## Kütüphaneler
+
+```{r c1}
+# Gerekli paketlerin yüklenmesi
+library(tidyverse)   # dplyr, ggplot2 vb. için
+library(lubridate)   # Tarih-saat işlemleri için
+library(zoo)         # Hareketli ortalamalar için
+library(forecast)    # Zaman serisi dekompozisyonu, ACF/PACF analizleri için
+```
+
+## Veri
+
+Verinin okunması ve zaman biçimi dönüşümleri:
+
+```{r veri}
+
+# Veriyi okuma
+# Not: "creditcard.csv" dosyasının çalışma dizininde (working directory) olduğundan emin olun.
+df <- read_csv("creditcard.csv")
+
+```
+
+## Zaman dönüşümleri
+
+Time sütunu, işlemin başlangıçtan itibaren geçen saniye bilgisini içerir. Bu değeri, belirlediğimiz bir başlangıç tarihine ekleyerek gerçek bir zaman damgasına (Datetime) dönüştürüyoruz.
+
+```{r zaman dönüşümü}
+# Zaman Bilgisini Dönüştürme
+# 'Time' sütunu, başlangıçtan itibaren geçen saniye olarak verilmiştir.
+# Burada, bir origin (örneğin "2020-01-01") belirleyip, POSIXct formatına çevirebiliriz.
+origin_time <- as.POSIXct("2020-01-01 00:00:00", tz = "UTC")
+df <- df %>%
+  mutate(Datetime = origin_time + seconds(Time))
+
+```
+
+## Gruplama
+
+İşlemleri dakikalık periyotlara bölüp, her dakika için toplam Amount ve dolandırıcılık vakası sayısını (Class toplamı) hesaplıyoruz. Bu, verideki trend ve olası mevsimsel desenleri daha rahat gözlemlememize yardımcı olur.
+
+```{r gruplama}
+# Zaman Serisi Analizi İçin Zaman Diliminde Gruplama
+# Örneğin, dakikalık toplam işlem miktarı ve dolandırıcılık vakası sayısı hesaplayalım.
+df_minute <- df %>%
+  mutate(Minute = floor_date(Datetime, unit = "minute")) %>%
+  group_by(Minute) %>%
+  summarise(
+    total_amount = sum(Amount, na.rm = TRUE),
+    fraud_count = sum(Class, na.rm = TRUE),
+    n_transactions = n()
+  ) %>%
+  ungroup()
+
+```
+
+## Görselleştirme
+
+ggplot2 ile zaman serisi grafikleri çizilerek, zaman içindeki değişimlerin görsel analizi yapılır. Hareketli ortalama ekleyerek kısa vadeli dalgalanmaların altında yatan genel trend daha net görülebilir.
+
+```{r görselleştirme}
+# Zaman Serisi Görselleştirmesi
+
+## a) İşlem Miktarındaki Trendin İncelenmesi
+p1 <- ggplot(df_minute, aes(x = Minute, y = total_amount)) +
+  geom_line(color = "steelblue") +
+  labs(title = "Dakikaya Göre Toplam İşlem Miktarı (Amount)",
+       x = "Zaman", y = "Toplam Amount") +
+  theme_minimal()
+
+## b) Dolandırıcılık Vakalarının Zaman İçindeki Dağılımı
+p2 <- ggplot(df_minute, aes(x = Minute, y = fraud_count)) +
+  geom_line(color = "firebrick") +
+  labs(title = "Dakikaya Göre Dolandırıcılık Vakası Sayısı",
+       x = "Zaman", y = "Dolandırıcılık (Class = 1) Sayısı") +
+  theme_minimal()
+
+print(p1)
+print(p2)
+
+
+```
+
+## Hareketli Ortalama
+
+```{r Hareketli Ortalama}
+
+
+# Hareketli Ortalama ile Trend Analizi
+# Örneğin, 10 dakikalık hareketli ortalama hesaplanabilir.
+df_minute <- df_minute %>%
+  arrange(Minute) %>%
+  mutate(ma_amount = rollmean(total_amount, k = 10, fill = NA, align = "right"),
+         ma_fraud = rollmean(fraud_count, k = 10, fill = NA, align = "right"))
+
+p1_ma <- ggplot(df_minute, aes(x = Minute)) +
+  geom_line(aes(y = total_amount), color = "gray", alpha = 0.5) +
+  geom_line(aes(y = ma_amount), color = "blue", size = 1) +
+  labs(title = "Hareketli Ortalama ile Toplam İşlem Miktarı", x = "Zaman", y = "Amount") +
+  theme_minimal()
+
+print(p1_ma)
+
+```
+
+## Zaman serisi ayrıştırma
+
+Yeterince uzun ve düzenli verilerde, stl() fonksiyonu ile zaman serisi dekompozisyonu yapılarak trend, mevsimsel ve rastgele bileşenler ayrıştırılır.
+
+```{r Zaman serisi ayrıştırma}
+
+# Zaman Serisi Dekompozisyonu
+# Eğer veri serisi yeterince uzun ve düzenliyse, stl() fonksiyonuyla dekompozisyon yapabiliriz.
+# Öncelikle, ts() objesi oluşturmak için veriyi düzenleyelim.
+# Burada dakikalık veri kullanıldığı için günlük periyot: 24*60 = 1440 gözlem olabilir.
+# Eğer veri seti bu uzunlukta değilse, frekansı ona göre ayarlayın.
+#if(nrow(df_minute) >= 1440){
+#  ts_amount <- ts(df_minute$total_amount, frequency = 1440, start = c(year(min(df_minute$Minute)), yday(min(df_minute$Minute))))
+#  decomposed <- stl(ts_amount, s.window = "periodic")
+#  autoplot(decomposed) + ggtitle("İşlem Miktarı Zaman Serisi Dekompozisyonu")
+#} else {
+#  message("Veri seti dekompozisyon için yeterince uzun değil. (1440 gözlem önerilir.)")
+#}
+
+
+# Veri uzunluğunu kontrol edelim:
+n_obs <- nrow(df_minute)
+cat("Toplam gözlem sayısı:", n_obs, "\n")
+
+# Varsayılan periyot: günlük (1440 dakikalık) mevsimsellik
+daily_frequency <- 1440
+
+# Eğer veri en az beş gün (5 * 1440 = 7200 gözlem) içermiyorsa, periyodu saatlik (60) olarak ayarlayalım:
+if(n_obs < 5 * daily_frequency) {
+  frequency_used <- 60  # Saatlik periyot
+  cat("Veri 5 günlük periyodu karşılamıyor. Saatlik periyot (frequency = 60) kullanılacak.\n")
+} else {
+  frequency_used <- daily_frequency
+  cat("Günlük periyot (frequency = 1440) kullanılacak.\n")
+}
+
+# Zaman serisini oluşturma:
+ts_amount <- ts(df_minute$total_amount, frequency = frequency_used)
+
+# STL dekompozisyonunu uygulama:
+# Eğer veri yine de iki tam periyodu içermiyorsa, dekompozisyon işlemi hata verebilir.
+if(length(ts_amount) >= 2 * frequency_used) {
+  decomposed <- stl(ts_amount, s.window = "periodic")
+  autoplot(decomposed) + ggtitle("İşlem Miktarı Zaman Serisi Dekompozisyonu")
+} else {
+  message("Zaman serisi, STL dekompozisyonu için yeterli periyodu içermiyor.")
+}
+
+```
+
+## Otokorelasyon
+
+ACF (otomatik korelasyon fonksiyonu) ve PACF (kısmi otomatik korelasyon fonksiyonu) ile serinin gecikmeli bağımlılıkları incelenir.
+
+```{r otokorelasyon}
+
+# Otokorelasyon Analizi (ACF/PACF)
+acf_plot <- ggAcf(df_minute$total_amount, lag.max = 50) +
+  ggtitle("Total Amount için ACF")
+pacf_plot <- ggPacf(df_minute$total_amount, lag.max = 50) +
+  ggtitle("Total Amount için PACF")
+
+print(acf_plot)
+print(pacf_plot)
+
+```
+
+```{r}
+# Gerekli kütüphaneleri yükleme
+if (!require("readr")) install.packages("readr")
+if (!require("ggplot2")) install.packages("ggplot2")
+if (!require("forecast")) install.packages("forecast")
+if (!require("tseries")) install.packages("tseries")
+if (!require("dplyr")) install.packages("dplyr")
+
+library(readr)
+library(ggplot2)
+library(forecast)
+library(tseries)
+library(dplyr)
+
+# Veriyi okuma
+data <- read_csv("creditcard.csv")
+
+# Veriyi inceleme
+head(data)
+summary(data)
+
+# Time sütununu gün cinsinden çevirelim (örneğin, 86400 saniye = 1 gün)
+data$Time_days <- data$Time / 86400
+
+# Amount'un zamana göre değişimi
+ggplot(data, aes(x = Time_days, y = Amount)) +
+  geom_line(color = "blue", alpha = 0.5) +
+  labs(title = "Zamana Göre Harcama Miktarı", x = "Zaman (Gün)", y = "Harcama Miktarı") +
+  theme_minimal()
+
+# Dolandırıcılık vakalarının zamana göre dağılımı
+fraud_data <- data %>% filter(Class == 1)
+ggplot(fraud_data, aes(x = Time_days, y = Amount)) +
+  geom_point(color = "red", alpha = 0.5) +
+  labs(title = "Zamana Göre Dolandırıcılık Vakaları", x = "Zaman (Gün)", y = "Harcama Miktarı") +
+  theme_minimal()
+
+# Zaman serisi oluşturma (Amount için)
+amount_ts <- ts(data$Amount, frequency = 24 * 60 * 60) # Saniye bazında frekans
+
+# Trend ve mevsimsellik analizi (STL ayrıştırması)
+stl_decomposition <- stl(amount_ts, s.window = "periodic")
+plot(stl_decomposition)
+
+# ACF ve PACF analizi
+acf(amount_ts, main = "Otokorelasyon Fonksiyonu (ACF)")
+pacf(amount_ts, main = "Kısmi Otokorelasyon Fonksiyonu (PACF)")
+
+# Durağanlık testi (ADF Testi)
+adf_test <- adf.test(amount_ts)
+print(adf_test)
+
+# Eğer seride trend varsa fark alma işlemi ile durağan hale getirebiliriz
+diff_amount_ts <- diff(amount_ts)
+adf_test_diff <- adf.test(diff_amount_ts)
+print(adf_test_diff)
+
+# Farklılaşmış serinin grafiği
+plot(diff_amount_ts, main = "Farklılaşmış Zaman Serisi", xlab = "Zaman", ylab = "Farklılaşmış Harcama Miktarı")
+
+
+```
+
+```{r}
+# Gerekli kütüphaneler
+library(ggplot2)
+library(dplyr)
+library(forecast)
+library(lubridate)
+
+# Veriyi yükleme
+credit_data <- read.csv("creditcard.csv")
+
+# Zaman değişkenini saat cinsine çevirme
+credit_data <- credit_data %>%
+  mutate(
+    Time_hours = Time / 3600, # Saniyeyi saate çevir
+    Time_bin = cut(Time_hours, breaks = seq(0, 48, by = 1)) # 1 saatlik dilimler
+  )
+```
+
+```{r}
+# Hareketli ortalama ile trend analizi
+ggplot(credit_data, aes(x = Time_hours, y = Amount)) +
+  geom_point(alpha = 0.3, color = "steelblue") +
+  geom_smooth(method = "loess", span = 0.1, color = "red") +
+  labs(title = "Zamana Göre İşlem Miktarı Trendi",
+       x = "Saat", y = "İşlem Miktarı") +
+  theme_minimal()
+
+# STL Decompozisyonu ile bileşen analizi
+amount_ts <- ts(credit_data$Amount, frequency = 24) # 24 saatlik periyot
+stl_decomp <- stl(amount_ts, s.window = "periodic")
+plot(stl_decomp, main = "İşlem Miktarı STL Decompozisyonu")
+```
+
+```{r}
+
+# Fraud yoğunluk grafiği
+ggplot(credit_data %>% filter(Class == 1), aes(x = Time_hours)) +
+  geom_density(fill = "firebrick", alpha = 0.7) +
+  labs(title = "Dolandırıcılık Vakalarının Zamansal Dağılımı",
+       x = "Saat", y = "Yoğunluk") +
+  theme_minimal()
+
+# Saatlik fraud oranları
+fraud_rates <- credit_data %>%
+  group_by(Time_bin) %>%
+  summarise(
+    Fraud_Rate = mean(Class),
+    Total_Transactions = n()
+  )
+
+ggplot(fraud_rates, aes(x = Time_bin, y = Fraud_Rate)) +
+  geom_col(fill = "darkred") +
+  labs(title = "Saatlik Dolandırıcılık Oranları",
+       x = "Zaman Dilimi (Saat)", y = "Fraud Oranı") +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1))
+
+```
+
+```{r}
+# Otokorelasyon analizi
+acf_result <- Acf(amount_ts, main = "İşlem Miktarı Otokorelasyon")
+Pacf(amount_ts, main = "Kısmi Otokorelasyon")
+
+# Zaman serisi tahmin modeli (ARIMA)
+arima_model <- auto.arima(amount_ts)
+summary(arima_model)
+
+# Anomali tespiti (Fraud olasılık analizi)
+outliers <- tsoutliers(amount_ts)
+print(paste("Tespit edilen anomali sayısı:", length(outliers$index)))
+```
+
+# 5.4 Aykırı Değer
+
+## Gerekli Kütüphaneler
+
+```{r library}
+# Gerekli kütüphanelerin yüklenmesi
+library(dplyr)
+library(ggplot2)
+library(readr)
+library(gridExtra)
+```
+
+## Veri
+
+```{r data}
+# Veri setinin okunması
+credit <- read_csv("creditcard.csv")
+
+```
+
+## Kutu grafiği ile Aykırı Değer Tespiti
+
+```{r boxplot}
+# -----------------------
+# Boxplot Yöntemi için:
+# -----------------------
+# 'Amount' değişkeni üzerinden boxplot sınırlarının hesaplanması
+box_stats <- boxplot(credit$Amount, plot = FALSE)$stats
+lower_bound <- box_stats[1]  # Alt sınır
+upper_bound <- box_stats[5]  # Üst sınır
+
+# Aykırı değerler: Amount değeri, boxplot sınırlarının dışında kalanlar
+credit <- credit %>%
+  mutate(outlier_boxplot = if_else(Amount < lower_bound | Amount > upper_bound, "Outlier", "Normal"),
+         outlier_boxplot = factor(outlier_boxplot, levels = c("Normal", "Outlier")))
+
+# Boxplot görselleştirmesi: Nokta grafiği ile aykırı değerler vurgulanıyor
+p1 <- ggplot(credit, aes(x = "", y = Amount)) +
+  geom_boxplot(outlier.shape = NA) +
+  geom_jitter(aes(color = outlier_boxplot), width = 0.1, alpha = 0.5) +
+  labs(title = "Boxplot: İşlem Tutarı (Amount)", y = "Amount", x = "") +
+  theme_minimal() +
+  scale_color_manual(values = c("Normal" = "blue", "Outlier" = "red"))
+```
+
+## Z-Skoru ile Aykırı Değer Tespiti
+
+```{r zscore}
+# -----------------------
+# Z-Skoru Yöntemi için:
+# -----------------------
+# Z-skoru hesaplanması: Her bir 'Amount' değerinin ortalamadan kaç standart sapma uzakta olduğunu bulur.
+credit <- credit %>%
+  mutate(Amount_z = scale(Amount)[,1],
+         outlier_z = if_else(abs(Amount_z) > 3, "Outlier", "Normal"),
+         outlier_z = factor(outlier_z, levels = c("Normal", "Outlier")))
+
+# Z-skoru görselleştirmesi: Nokta grafiğinde |Z| > 3 sınırları çizilmiştir.
+p2 <- ggplot(credit, aes(x = 1:nrow(credit), y = Amount_z, color = outlier_z)) +
+  geom_point(alpha = 0.5) +
+  geom_hline(yintercept = 3, linetype = "dashed", color = "red") +
+  geom_hline(yintercept = -3, linetype = "dashed", color = "red") +
+  labs(title = "Z-Skoru: İşlem Tutarı", x = "Gözlem Sırası", y = "Z-Skoru") +
+  theme_minimal() +
+  scale_color_manual(values = c("Normal" = "blue", "Outlier" = "red"))
+
+```
+
+## Mahalanobis ile Aykırı Değer Tespiti
+
+```{r Mahalanobis}
+# -------------------------------
+# Mahalanobis Uzaklığı Yöntemi için:
+# -------------------------------
+# PCA ile oluşturulmuş V1, V2, ..., V28 değişkenlerini seçelim:
+pca_vars <- grep("^V", names(credit), value = TRUE)
+pca_data <- credit[, pca_vars]
+
+# Merkezi değerler ve kovaryans matrisinin hesaplanması
+center <- colMeans(pca_data)
+cov_mat <- cov(pca_data)
+
+# Her bir gözlemin Mahalanobis uzaklığının hesaplanması
+credit$mahalanobis <- mahalanobis(pca_data, center, cov_mat)
+
+# Aykırı değer eşiği: %1'lik anlamlılık düzeyi (chi-kare dağılımı)
+threshold <- qchisq(0.99, df = length(pca_vars))
+
+# Aykırı değerler: Mahalanobis uzaklığı, belirlenen eşikten büyük olanlar
+credit <- credit %>%
+  mutate(outlier_mahalanobis = if_else(mahalanobis > threshold, "Outlier", "Normal"),
+         outlier_mahalanobis = factor(outlier_mahalanobis, levels = c("Normal", "Outlier")))
+
+# Mahalanobis uzaklığı görselleştirmesi: Gözlem sırası ile uzaklıklar çiziliyor.
+p3 <- ggplot(credit, aes(x = 1:nrow(credit), y = mahalanobis, color = outlier_mahalanobis)) +
+  geom_point(alpha = 0.5) +
+  geom_hline(yintercept = threshold, linetype = "dashed", color = "red") +
+  labs(title = "Mahalanobis Uzaklığı: PCA Değişkenleri", x = "Gözlem Sırası", y = "Mahalanobis Uzaklığı") +
+  theme_minimal() +
+  scale_color_manual(values = c("Normal" = "blue", "Outlier" = "red"))
+
+```
+
+## Görselleştirmeler
+
+```{r grids}
+# Örneklem seçimi: Tüm veriden 5000 gözlem rastgele seçiliyor
+set.seed(123)  # Tekrarlanabilir sonuçlar için
+credit_sample <- credit %>% sample_n(5000)
+
+# -----------------------
+# Boxplot Yöntemi için:
+# -----------------------
+# 'Amount' değişkeni üzerinden boxplot sınırlarının hesaplanması
+box_stats <- boxplot(credit_sample$Amount, plot = FALSE)$stats
+lower_bound <- box_stats[1]  # Alt sınır
+upper_bound <- box_stats[5]  # Üst sınır
+
+# Aykırı değerler: Amount değeri, boxplot sınırlarının dışında kalanlar
+credit_sample <- credit_sample %>%
+  mutate(outlier_boxplot = if_else(Amount < lower_bound | Amount > upper_bound, "Outlier", "Normal"),
+         outlier_boxplot = factor(outlier_boxplot, levels = c("Normal", "Outlier")))
+
+# Boxplot görselleştirmesi
+p1 <- ggplot(credit_sample, aes(x = "", y = Amount)) +
+  geom_boxplot(outlier.shape = NA) +
+  geom_jitter(aes(color = outlier_boxplot), width = 0.1, alpha = 0.5) +
+  labs(title = "Boxplot: İşlem Tutarı (Amount) [Örneklem]", y = "Amount", x = "") +
+  theme_minimal() +
+  scale_y_sqrt() +
+  scale_color_manual(values = c("Normal" = "blue", "Outlier" = "red"))
+
+# -----------------------
+# Z-Skoru Yöntemi için:
+# -----------------------
+# Z-skoru hesaplanması: Her bir 'Amount' değerinin ortalamadan kaç standart sapma uzakta olduğunu bulur.
+credit_sample <- credit_sample %>%
+  mutate(Amount_z = scale(Amount)[,1],
+         outlier_z = if_else(abs(Amount_z) > 3, "Outlier", "Normal"),
+         outlier_z = factor(outlier_z, levels = c("Normal", "Outlier")))
+
+# Z-skoru görselleştirmesi
+p2 <- ggplot(credit_sample, aes(x = 1:nrow(credit_sample), y = Amount_z, color = outlier_z)) +
+  geom_point(alpha = 0.5) +
+  geom_hline(yintercept = 3, linetype = "dashed", color = "red") +
+  geom_hline(yintercept = -3, linetype = "dashed", color = "red") +
+  labs(title = "Z-Skoru: İşlem Tutarı [Örneklem]", x = "Gözlem Sırası", y = "Z-Skoru") +
+  theme_minimal() +
+  scale_y_sqrt() +
+  scale_color_manual(values = c("Normal" = "blue", "Outlier" = "red"))
+
+# -------------------------------
+# Mahalanobis Uzaklığı Yöntemi için:
+# -------------------------------
+# PCA ile oluşturulmuş V1, V2, ..., V28 değişkenlerini seçelim:
+pca_vars <- grep("^V", names(credit_sample), value = TRUE)
+pca_data <- credit_sample[, pca_vars]
+
+# Merkezi değerler ve kovaryans matrisinin hesaplanması
+center <- colMeans(pca_data)
+cov_mat <- cov(pca_data)
+
+# Her bir gözlemin Mahalanobis uzaklığının hesaplanması
+credit_sample$mahalanobis <- mahalanobis(pca_data, center, cov_mat)
+
+# Aykırı değer eşiği: %1'lik anlamlılık düzeyi (chi-kare dağılımı)
+threshold <- qchisq(0.99, df = length(pca_vars))
+
+# Aykırı değerler: Mahalanobis uzaklığı, belirlenen eşikten büyük olanlar
+credit_sample <- credit_sample %>%
+  mutate(outlier_mahalanobis = if_else(mahalanobis > threshold, "Outlier", "Normal"),
+         outlier_mahalanobis = factor(outlier_mahalanobis, levels = c("Normal", "Outlier")))
+
+# Mahalanobis uzaklığı görselleştirmesi
+p3 <- ggplot(credit_sample, aes(x = 1:nrow(credit_sample), y = mahalanobis, color = outlier_mahalanobis)) +
+  geom_point(alpha = 0.5) +
+  geom_hline(yintercept = threshold, linetype = "dashed", color = "red") +
+  labs(title = "Mahalanobis Uzaklığı: PCA Değişkenleri [Örneklem]", x = "Gözlem Sırası", y = "Mahalanobis Uzaklığı") +
+  theme_minimal() +
+  scale_y_sqrt() +
+  scale_color_manual(values = c("Normal" = "blue", "Outlier" = "red"))
+
+# Görselleştirmelerin bir arada sunulması
+grid.arrange(p1, p2, p3, nrow = 3)
+```
+
+```{r grid}
+# -----------------------
+# Görselleştirmelerin bir arada sunulması
+grid.arrange(p1, p2, p3, nrow = 3)
+
+```
+
+## Aykırı veri tespiti
+
+```{r output}
+
+# Faktörleri sayısal değerlere dönüştürme: "Outlier" -> 1, "Normal" -> 0
+credit <- credit %>%
+  mutate(
+    outlier_boxplot_num = if_else(outlier_boxplot == "Outlier", 1, 0),
+    outlier_z_num = if_else(outlier_z == "Outlier", 1, 0),
+    outlier_mahalanobis_num = if_else(outlier_mahalanobis == "Outlier", 1, 0)
+  )
+
+# Fraud (dolandırıcılık) ile örtüşme sayılarını hesaplayalım:
+overlap_boxplot <- sum(credit$outlier_boxplot_num == 1 & credit$Class == 1)
+overlap_z <- sum(credit$outlier_z_num == 1 & credit$Class == 1)
+overlap_mahalanobis <- sum(credit$outlier_mahalanobis_num == 1 & credit$Class == 1)
+
+# Toplam aykırı değer ve fraud ile örtüşme sayılarını konsola yazdırma
+cat("Boxplot yöntemi ile tespit edilen aykırı değer sayısı:", sum(credit$outlier_boxplot_num), "\n")
+cat("  -> Bu aykırı değerlerin fraud ile örtüşme sayısı:", overlap_boxplot, "\n\n")
+
+cat("Z-skoru yöntemi ile tespit edilen aykırı değer sayısı:", sum(credit$outlier_z_num), "\n")
+cat("  -> Bu aykırı değerlerin fraud ile örtüşme sayısı:", overlap_z, "\n\n")
+
+cat("Mahalanobis yöntemi ile tespit edilen aykırı değer sayısı:", sum(credit$outlier_mahalanobis_num), "\n")
+cat("  -> Bu aykırı değerlerin fraud ile örtüşme sayısı:", overlap_mahalanobis, "\n")
+
+# Orijinal veri setindeki dolandırıcılık vakası sayısını hesaplama
+fraud_count <- sum(credit$Class == 1)
+
+# Sonucu konsola yazdırma
+cat("Orijinal veride", fraud_count, "adet dolandırıcılık (fraud) vakası bulunmaktadır.\n")
+
+```
+
+# 5.5 Çoklu Veri
+
+## Giriş
+
+Korelasyon Analizi: Sayısal (numerik) değişkenler arasındaki doğrusal ilişkinin ölçülmesi amacıyla kullanılır. Korelasyon katsayısı, iki değişkenin birlikte nasıl değiştiğini gösterir. Çapraz Tablo Analizi: Kategorik değişkenler arasındaki ilişkiyi ortaya koymak için frekans tabloları oluşturur. Bu analiz ile örneğin, saç rengi ve göz rengi gibi kategorik özellikler arasındaki ilişki değerlendirilebilir.
+
+Gerçek hayatta veriler genellikle farklı kaynaklardan elde edilir ve analiz yapabilmek için bu veri setlerinin ortak bir anahtar üzerinden birleştirilmesi gerekir. R kütüphanelerinde yerleşik veri setlerinden USArrests (1973’te ABD eyaletlerindeki suç oranları) ve state.x77 (eyaletlere ait sosyo-ekonomik göstergeler) kullanılarak iki veri seti birleştirilecek, ardından:
+
+Korelasyon Analizi: Suç oranları ile sosyo-ekonomik faktörler arasındaki ilişkiler incelenecek. Çapraz Tablo Analizi: Eyaletlerin gelir düzeylerinin (yüksek/düşük) ABD’nin coğrafi bölgelerine göre dağılımı analiz edilecektir.
+
+```{r verisetleri}
+# USArrests veri seti: Suç oranları
+head(USArrests)
+
+# state.x77 veri seti: Sosyo-ekonomik göstergeler (matrix formatında)
+head(state.x77)
+
+```
+
+## Veriseti oluşturma
+
+Her iki veri setinde de satır isimleri eyalet isimlerini içermektedir. Bu ortak anahtar üzerinden veri setlerini birleştirelim:
+
+```{r veri birleştirme}
+# state.x77 matrisini data.frame'e çeviriyoruz ve "State" sütunu ekliyoruz
+state_df <- as.data.frame(state.x77)
+state_df$State <- rownames(state_df)
+
+# USArrests veri setine de "State" sütunu ekleyelim
+arrests_df <- USArrests
+arrests_df$State <- rownames(USArrests)
+
+# İki veri setini, "State" sütunu üzerinden birleştiriyoruz
+merged_df <- merge(arrests_df, state_df, by = "State")
+
+# Birleştirilmiş veri setinin ilk birkaç satırına göz atalım
+head(merged_df)
+
+```
+
+## Korelasyon Analizi
+
+Birleştirilmiş veri setinde yer alan sayısal değişkenler arasında korelasyon analizi yapabiliriz. Örneğin, Murder (cinayet oranı) ile Income (kışkırtıcı sosyo-ekonomik gösterge) arasındaki ilişkiyi inceleyelim.
+
+```{r korelasyon}
+# Korelasyon matrisi hesaplanması için ilgili sayısal sütunları seçelim
+# (State sütunu hariç, tüm sütunlar sayısaldır)
+cor_matrix <- cor(merged_df[ , -1])
+print(round(cor_matrix, 2))
+
+```
+
+## Korelasyon Matrisi Görselleştirme
+
+İlişkilerin daha iyi anlaşılması için corrplot paketini kullanarak görselleştirme yapalım:
+
+```{r corrplot}
+# Gerekli paket yüklü değilse:
+# install.packages("corrplot")
+library(corrplot)
+
+# Korelasyon matrisini görselleştirme
+corrplot(cor_matrix, method = "color", type = "upper", tl.col = "black", tl.srt = 45)
+
+
+```
+
+## Çapraz Tablo Analizi
+
+Kategorik Değişken Oluşturma: Gelir Düzeyi
+
+Sosyo-ekonomik göstergeler arasında yer alan Income değişkeni üzerinden eyaletleri "Yüksek Gelir" ve "Düşük Gelir" olarak sınıflandırmak için, medyan değeri kullanabiliriz:
+
+```{r}
+# Gelir değişkeni için medyan değeri hesaplayalım
+median_income <- median(merged_df$Income)
+
+# Gelir düzeyine göre kategorik değişken oluşturalım
+merged_df$IncomeLevel <- ifelse(merged_df$Income > median_income, "Yüksek", "Düşük")
+
+# Gelir düzeyine ait dağılımı gözlemleyelim
+table(merged_df$IncomeLevel)
+```
+
+Eyaletlerin coğrafi bölgelerini eklemek için state.region vektöründe yer alan eyaletlerin coğrafi bölgeleri bilgisini birleştirilmiş veri setimize ekleyelim:
+
+```{r}
+# state.region vektörünü data.frame'e çevirip eyalet isimleri ile eşleştirelim
+region_df <- data.frame(State = state.name, Region = state.region)
+
+# Birleştirilmiş veri setimize coğrafi bölge bilgisini ekleyelim
+merged_df <- merge(merged_df, region_df, by = "State")
+
+# Son haliyle veri setine göz atalım
+head(merged_df)
+```
+
+## Çapraz Tablo Oluşturma ve Görselleştirme
+
+Artık, eyaletlerin gelir düzeyi (IncomeLevel) ile coğrafi bölgeler (Region) arasındaki ilişkiyi çapraz tablo ve mosaic plot ile inceleyebiliriz:
+
+```{r}
+# Gelir düzeyi ve bölge arasındaki çapraz tablo
+income_region_table <- table(merged_df$IncomeLevel, merged_df$Region)
+print(income_region_table)
+
+# Mosaic plot ile görselleştirme
+mosaicplot(income_region_table, main = "Gelir Düzeyi ve Coğrafi Bölge İlişkisi", color = TRUE)
+```
+
+```{r}
+# Ki-kare testi
+chi_test <- chisq.test(income_region_table)
+print(chi_test)
+```
+
+```{r}
+# Medyan değerleri hesaplayalım
+median_murder <- mean(merged_df$Murder.y)
+median_income <- mean(merged_df$Income)
+
+# Murder için "Yüksek" ve "Düşük" kategorilerini oluşturalım
+merged_df$MurderLevel <- ifelse(merged_df$Murder.y > median_murder, "Yüksek", "Düşük")
+
+# Income için "Yüksek" ve "Düşük" kategorilerini oluşturalım
+merged_df$IncomeLevel <- ifelse(merged_df$Income > median_income, "Yüksek", "Düşük")
+
+# Oluşan kategorik değişkenlerin dağılımına göz atalım
+table(merged_df$MurderLevel)
+table(merged_df$IncomeLevel)
+```
+
+```{r}
+# MurderLevel ve IncomeLevel değişkenleri için çapraz tablo oluşturma
+murder_income_table <- table(merged_df$MurderLevel, merged_df$IncomeLevel)
+print(murder_income_table)
+```
+
+```{r}
+# Ki-kare testini uygulama
+chi_test_result <- chisq.test(murder_income_table)
+print(chi_test_result)
+```
+
+## Özet
+
+-   USArrests ve state.x77 veri setleri, eyalet isimleri üzerinden birleştirilerek, suç oranları ve sosyo-ekonomik göstergelerin aynı veri çerçevesinde incelenmesi sağlandı.\
+-   Birleştirilmiş veri setinde yer alan sayısal değişkenler arasında korelasyon hesaplanarak, örneğin Murder ile Income arasındaki ilişki değerlendirildi.\
+-   corrplot kullanılarak ilişkiler grafiksel olarak ortaya kondu.
+-   Income değişkeni medyan değeri baz alınarak "Yüksek" ve "Düşük" gelir kategorilerine ayrıldı.\
+-   Eyaletlerin coğrafi bölgeleri state.region verisiyle birleştirildi.\
+-   Gelir düzeyi ile coğrafi bölge arasındaki ilişki, çapraz tablo ve mosaic plot ile görselleştirildi.\
+-   Ki-kare testi ile ilişkinin istatistiksel anlamlılığı değerlendirildi.\
+
+İki farklı veri setinin ortak anahtar üzerinden nasıl birleştirilebileceğini, ardından bu birleşik veri setinde sayısal ve kategorik değişkenler arasındaki ilişkilerin nasıl analiz edilebileceğini gördük. Böylece, verinin farklı kaynaklardan geldiği durumlarda bile kapsamlı analizler gerçekleştirebiliriz.
+
+# 6.1 Grafiksel Sunumlar
+
+## IRIS Veri Seti
+
+IRIS veri seti, makine öğrenimi ve veri biliminde sıklıkla kullanılan bir veri setidir. Bu veri seti, üç farklı çiçek türünün (setosa, versicolor, virginica) çeşitli özelliklerini içerir.
+
+## Kütüphanelerin Yüklenmesi
+
+```{r}
+# Gerekli kütüphaneleri yükleme
+library(ggplot2)
+library(dplyr)
+library(datasets)
+
+# IRIS veri setini yükleme
+data("iris")
+head(iris)  # Veri setinin ilk 5 satırını görüntüleme
+```
+
+## Veri Görselleştirme
+
+### Sepal Uzunluğu ve Genişliği Scatter Plot
+
+```{r}
+# Sepal uzunluğu ve genişliği arasındaki ilişkiyi görselleştirme
+ggplot(iris, aes(x = Sepal.Length, y = Sepal.Width)) +
+  geom_point() +
+  ggtitle("Iris Veri Seti") +
+  xlab("Sepal Uzunluğu (cm)") +
+  ylab("Sepal Genişliği (cm)")
+```
+
+### Çiçek Türlerine Göre Renklendirilmiş Scatter Plot
+
+```{r}
+# Çiçek türlerine göre renklendirilmiş scatter plot
+ggplot(iris, aes(x = Sepal.Length, y = Sepal.Width, color = Species)) +
+  geom_point() +
+  ggtitle("Iris Veri Seti - Çiçek Türleri") +
+  xlab("Sepal Uzunluğu (cm)") +
+  ylab("Sepal Genişliği (cm)")
+```
+
+### Petal Uzunluğu ve Genişliği Scatter Plot
+
+```{r}
+# Petal uzunluğu ve genişliği arasındaki ilişkiyi görselleştirme
+ggplot(iris, aes(x = Petal.Length, y = Petal.Width, color = Species)) +
+  geom_point() +
+  ggtitle("Iris Veri Seti - Çiçek Türleri") +
+  xlab("Petal Uzunluğu (cm)") +
+  ylab("Petal Genişliği (cm)")
+```
+
+## Veri Setinin Özelliklerinin Görselleştirilmesi
+
+### Her Bir Özellik İçin Histogram
+
+```{r}
+# Her bir özellik için histogram çizimi
+par(mfrow = c(2, 2))  # 2x2 grafik düzeni
+
+hist(iris$Sepal.Length, breaks = 20, col = "green", main = "Sepal Uzunluğu", xlab = "Uzunluk (cm)", ylab = "Sayı")
+hist(iris$Sepal.Width, breaks = 20, col = "blue", main = "Sepal Genişliği", xlab = "Genişlik (cm)", ylab = "Sayı")
+hist(iris$Petal.Length, breaks = 20, col = "red", main = "Petal Uzunluğu", xlab = "Uzunluk (cm)", ylab = "Sayı")
+hist(iris$Petal.Width, breaks = 20, col = "yellow", main = "Petal Genişliği", xlab = "Genişlik (cm)", ylab = "Sayı")
+```
+
+```{r}
+# Korelasyon matrisini hesaplama
+cor_matrix <- cor(iris[, 1:4])
+print(cor_matrix)
+
+# Korelasyon matrisini ısı haritası olarak görselleştirme
+library(corrplot)
+corrplot(cor_matrix, method = "color", addCoef.col = "black", tl.col = "black")
+```
+
+# 6.2 Zaman Serisi
+
+## Zaman serisi grafikleri, histogram, kutu ve dağılım grafikleri
+
+```{r}
+# Gerekli kütüphaneleri yükleme
+library(ggplot2)
+library(dplyr)
+```
+
+```{r}
+# Veriyi okuma (dosya yolunu kendinize göre ayarlayın)
+credit_data <- read.csv("creditcard.csv")
+
+# Veri yapısını kontrol etme
+str(credit_data)
+```
+
+```{r}
+# Class değişkenini faktöre çevirme
+credit_data$Class <- as.factor(credit_data$Class)
+```
+
+## Zaman Serisi Analizi
+
+```{r}
+# Zaman vs Miktar grafiği
+ggplot(credit_data, aes(x = Time, y = Amount)) +
+  geom_point(alpha = 0.5) +
+  labs(title = "Zaman İçinde İşlem Miktarları",
+       x = "Zaman (saniye)",
+       y = "Miktar") +
+  theme_minimal()
+```
+
+```{r}
+# Zaman içinde işlem yoğunluğu
+ggplot(credit_data, aes(x = Time)) +
+  geom_density(fill = "blue", alpha = 0.5) +
+  labs(title = "Zaman İçinde İşlem Yoğunluğu",
+       x = "Zaman (saniye)",
+       y = "Yoğunluk") +
+  theme_minimal()
+```
+
+## Histogramlar
+
+```{r}
+# Miktar histogramı (log ölçekli)
+ggplot(credit_data, aes(x = Amount)) +
+  geom_histogram(bins = 100, fill = "skyblue") +
+  scale_x_log10() + # Aşırı çarpıklığı azaltmak için
+  labs(title = "İşlem Miktarları Dağılımı (Log Ölçek)",
+       x = "Miktar (log10)",
+       y = "Sayım") +
+  theme_minimal()
+
+```
+
+```{r}
+# Sahtekarlık vs Normal işlem miktarları
+ggplot(credit_data, aes(x = Amount, fill = Class)) +
+  geom_histogram(bins = 100, alpha = 0.6) +
+  scale_x_log10() +
+  facet_wrap(~Class, scales = "free") +
+  labs(title = "Sahtekarlık vs Normal İşlem Miktarları",
+       x = "Miktar (log10)",
+       y = "Sayım") +
+  theme_minimal()
+```
+
+## Kutu Grafikleri
+
+```{r}
+# V1-V6 değişkenleri için kutu grafikleri (Class'a göre)
+credit_data %>%
+  select(V1:V6, Class) %>%
+  tidyr::gather(key = "Variable", value = "Value", -Class) %>%
+  ggplot(aes(x = Class, y = Value, fill = Class)) +
+  geom_boxplot() +
+  facet_wrap(~Variable, scales = "free") +
+  labs(title = "Sahtekarlık Durumuna Göre V1-V6 Dağılımları") +
+  theme_minimal()
+```
+
+## Dağılım Grafikleri
+
+```{r}
+# V1 vs V2 dağılımı (Class'a göre)
+ggplot(credit_data, aes(x = V1, y = V2, color = Class)) +
+  geom_point(alpha = 0.5) +
+  labs(title = "V1 vs V2 Dağılımı") +
+  theme_minimal()
+```
+
+```{r}
+# V3-V6 değişkenleri için yoğunluk grafikleri
+credit_data %>%
+  select(V3:V6, Class) %>%
+  tidyr::gather(key = "Variable", value = "Value", -Class) %>%
+  ggplot(aes(x = Value, fill = Class)) +
+  geom_density(alpha = 0.5) +
+  facet_wrap(~Variable, scales = "free") +
+  labs(title = "Sahtekarlık Durumuna Göre V3-V6 Yoğunlukları") +
+  theme_minimal()
+```
+
+```{r}
+# Zaman-Miktar-İlişki Analizi
+ggplot(credit_data, aes(x = Time, y = Amount, color = Class)) +
+  geom_point(alpha = 0.3) +
+  scale_y_log10() +
+  labs(title = "Zaman-Miktar-Sahtekarlık İlişkisi",
+       x = "Zaman (saniye)",
+       y = "Miktar (log10)") +
+  theme_minimal()
+```
+
+## Çok Boyutlu Veri
+
+## Zaman serisi, histogram, kutu ve dağılım grafikleri
+
+```{r}
+# Gerekli kütüphaneleri yükleme
+library(tidyr)
+library(data.table)
+library(ggplot2)
+library(dplyr)
+library(reshape2)
+library(GGally)
+library(plotly)
+library(Rtsne)
+```
+
+```{r}
+# Veriyi okuma (dosya yolunu kendinize göre ayarlayın)
+credit_data <- read.csv("creditcard.csv")
+
+# Veri yapısını kontrol etme
+head(credit_data)
+```
+
+```{r}
+# Class değişkenini faktöre çevirme
+credit_data$Class <- as.factor(credit_data$Class)
+```
+
+## Zaman Serisi Analizi
+
+```{r}
+# Veriyi uzun formata çevirme
+credit_long <- credit_data %>%
+  select(Time, V1:V28) %>%
+  pivot_longer(cols = V1:V28, names_to = "Variable", values_to = "Value")
+
+# Zamana göre tüm değişkenlerin dağılımı (Facet Grid)
+ggplot(credit_long, aes(x = Time, y = Value)) +
+  geom_point(alpha = 0.1, size = 0.5, color = "steelblue") +
+  facet_wrap(~Variable, scales = "free_y", ncol = 7) + # 4x7 grid
+  labs(title = "Zamana Göre Tüm Değişkenlerin Dağılımı",
+       x = "Zaman (saniye)",
+       y = "Değer") +
+  theme_minimal() +
+  theme(axis.text.x = element_blank()) # X eksen etiketlerini kaldır
+```
+
+# 6.3 PCA Analizi
+
+```{r}
+pca_result <- prcomp(credit_data[, c("V1","V2","V3","V4","V5","V6","V7","V8","V9","V10",
+                                     "V11","V12","V13","V14","V15","V16","V17","V18","V19",
+                                     "V20","V21","V22","V23","V24","V25","V26","V27","V28")], 
+                     scale. = TRUE)
+
+# PCA Sonuçlarını DataFrame'e çevirme
+pca_df <- data.frame(pca_result$x[, 1:2], Class = credit_data$Class)
+
+# PCA Görselleştirme
+ggplot(pca_df, aes(x = PC1, y = PC2, color = Class)) +
+  geom_point(alpha = 0.5) +
+  labs(title = "PCA ile Boyut İndirgeme (İlk 2 Bileşen)",
+       x = "PC1",
+       y = "PC2") +
+  scale_color_manual(values = c("grey", "red")) +
+  theme_minimal()
+```
+
+## Heatmap ile Korelasyon ve Class İlişkisi
+
+```{r}
+
+# Korelasyon matrisi (Class=1 için)
+corr_matrix <- credit_data %>%
+  filter(Class == 1) %>%
+  select(V1:V28) %>%
+  cor()
+
+# Heatmap
+melted_corr <- melt(corr_matrix)
+ggplot(melted_corr, aes(Var1, Var2, fill = value)) +
+  geom_tile() +
+  scale_fill_gradient2(low = "blue", high = "red", mid = "white", midpoint = 0) +
+  labs(title = "Sahtekarlık İşlemlerinde Değişken Korelasyonları",
+       x = "",
+       y = "") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 90))
+```
+
+## Parallel Coordinates Plot (Çoklu Değişken Karşılaştırma)
+
+```{r}
+
+
+# Örneklem alarak (performans için)
+set.seed(123)
+sample_data <- credit_data %>% 
+  group_by(Class) %>% 
+  sample_n(200)
+
+# Paralel koordinat grafiği
+ggparcoord(sample_data,
+           columns = 2:29, # V1-V28
+           groupColumn = "Class",
+           alphaLines = 0.3,
+           scale = "uniminmax") + 
+  scale_color_manual(values = c("grey", "red")) +
+  labs(title = "Paralel Koordinat Grafiği (V1-V28)") +
+  theme_minimal()
+```
+
+## Violin Plot (Class'a Göre Değişken Dağılımları)
+
+```{r}
+# V1-V6 için örnek (tüm değişkenler için 7x4 grid yapılabilir)
+credit_data %>%
+  select(V1:V6, Class) %>%
+  pivot_longer(cols = V1:V6, names_to = "Variable", values_to = "Value") %>%
+  ggplot(aes(x = Class, y = Value, fill = Class)) +
+  geom_violin(alpha = 0.7) +
+  facet_wrap(~Variable, scales = "free", ncol = 3) +
+  scale_fill_manual(values = c("grey", "red")) +
+  labs(title = "Sahtekarlık Durumuna Göre Değişken Dağılımları") +
+  theme_minimal()
+```
+
+## 3D Scatter Plot (Üç Önemli Değişken Seçimi)
+
+```{r}
+
+
+# 3B Dağılım Grafiği (V4, V14, V10)
+plot_ly(credit_data, 
+        x = ~V4, y = ~V14, z = ~V10,
+        color = ~Class, 
+        colors = c("grey", "red"),
+        opacity = 0.5) %>%
+  add_markers() %>%
+  layout(title = "3B Dağılım: V4 vs V14 vs V10")
+```
+
+```{r}
+# V1-V4 ve Amount ilişkisi
+credit_data %>%
+  select(V1:V4, Amount, Class) %>%
+  pivot_longer(cols = V1:V4, names_to = "Variable", values_to = "Value") %>%
+  ggplot(aes(x = Value, y = Amount, color = Class)) +
+  geom_point(alpha = 0.3) +
+  scale_y_log10() +
+  facet_wrap(~Variable, scales = "free_x", ncol = 2) +
+  labs(title = "Değişkenler ve Miktar İlişkisi") +
+  theme_minimal()
+```
+
+```{r}
+
+
+# t-SNE için örneklem
+set.seed(123)
+tsne_data <- credit_data %>% 
+  group_by(Class) %>% 
+  sample_n(200) %>% 
+  select(V1:V28)
+
+# t-SNE uygulama
+tsne_result <- Rtsne(tsne_data, perplexity = 30, check_duplicates = FALSE)
+
+# Görselleştirme
+tsne_df <- data.frame(tsne_result$Y, Class = credit_data %>% 
+                       group_by(Class) %>% 
+                       sample_n(200) %>% 
+                       pull(Class))
+
+ggplot(tsne_df, aes(x = X1, y = X2, color = Class)) +
+  geom_point(alpha = 0.6) +
+  scale_color_manual(values = c("grey", "red")) +
+  labs(title = "t-SNE ile Boyut İndirgeme") +
+  theme_minimal()
+```
+
+# 7. Raporlama ve Sonuçların Sunumu
+
+-   Analiz sonuçlarını etkili bir şekilde sunma ve raporlama
+-   R Markdown ile dinamik rapor oluşturma
+-   R Notebook kullanımı ve interaktif dokümantasyon
+-   Analiz sonuçlarının sunum teknikleri: Grafikler, tablolar ve özet raporlar
+-   Dashboard oluşturma: shiny ile temel uygulama geliştirme örnekleri
+-   Uygulama örnekleri ve vaka çalışmalarının değerlendirilmesi
+
+# 7.1 Analiz sonuçlarını sunma ve raporlama
+
+## Temel Prensipler
+
+1.  Hedef kitleye uygun dil ve detay seviyesi
+
+2.  Görselleştirmenin önemi ve veri hikayeciliği
+
+3.  Tekrarlanabilir raporlama
+
+## Rapor Yapısı
+
+1.  Yönetici özeti, giriş, amaç, yöntem, sonuçlar, öneriler
+
+2.  Özet tablolar ve anahtar metrikleri vurgulama
+
+# 7.2 R Markdown
+
+## Dinamik raporlama R Markdown Temelleri
+
+1.  Rmd dosya yapısı (YAML başlık, kod bölümleri (chunk), markdown)
+
+2.  HTML/PDF/Word çıktı formatları
+
+## Kod Entegrasyonu
+
+1.  echo=FALSE, results='hide' gibi chunk seçenekleri
+
+2.  Dinamik tablo ve grafik ekleme
+
+# 7.3 R Notebook
+
+## İnteraktif dokümantasyon R Notebook vs R Markdown Farkları
+
+1.  Gerçek zamanlı önizleme
+
+2.  Interaktif widget'lar (leaflet, plotly)
+
+# 7.4 Paylaşım Yöntemleri
+
+Doküman yayımlama:
+
+1.  RPubs
+
+2.  GitHub
+
+3.  RStudio Connect
+
+# 7.5 Analiz sonuçlarının sunum teknikleri
+
+Grafikler:
+
+1.  ggplot2 ile profesyonel görseller
+
+2.  Renk paletleri ve tema ayarları (theme_minimal())
+
+Tablolar:
+
+1.  kableExtra ile formatlanmış tablolar
+
+2.  DT paketi ile interaktif tablolar
+
+Özet Raporlar
+
+1.  summarytools paketi kullanımı
+
+# 7.6 Dashboard oluşturma Temel Bileşenler
+
+UI (fluidPage(), input widgets)
+
+Server mantığı (reactive())
+
+# 7.7 Uygulama örnekleri

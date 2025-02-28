@@ -39,7 +39,16 @@ Ayrıca, **“validation_data_to_be_shared.zip”** adlı başka bir veri seti d
 Dosya adı "Dev_data_to_be_shared.csv" olan veriyi okuyun:
 
 ```{r}
-veri = read.csv("Dev_data_to_be_shared.csv")
+veri <- read.csv("Dev_data_to_be_shared.csv")
+
+```
+
+```{r}
+veri2 <- read.delim("Dev_data_to_be_shared.csv", sep = ",", dec =".")
+```
+
+```{r}
+
 ```
 
 Okuduğumuz verinin yapısını inceleyelim:
@@ -53,7 +62,7 @@ Verinin başından ve sonundan inceleme
 öncelikle ilk değerleri gösterelim
 
 ```{r}
-head(veri)
+head(veri,15)
 ```
 
 head(veri) fonksiyonu ile verinin başından birkaç satır inceliyoruz.
@@ -67,23 +76,54 @@ Verinin son birkaç satırını tail(veri) fonksiyonu ile inceleyebiliriz.
 Verinin içinde örneğin önemli bir parametre olan bad_flag sütununu inceleyelim.
 
 ```{r}
-head(veri$bad_flag)
+min(veri$onus_attribute_1)
 ```
 
 Temerrüt verisi için özet istatistikleri hesaplatalım.
 
 ```{r}
-summary(veri$bad_flag)
+summary(veri$onus_attribute_1[is.na(veri$onus_attribute_1)==FALSE])
 
+```
+
+```{r}
+tail(veri$account_number[is.na(veri$account_number[veri$onus_attribute_1==221000])])
+```
+
+```{r}
+degisken_1 <- veri$account_number[veri$onus_attribute_1>58000][is.na(veri$onus_attribute_1[veri$onus_attribute_1>58000])==FALSE]
+```
+
+```{r}
+summary(degisken_1)
 ```
 
 Histogram çizdirelim
 
 ```{r}
-hist(veri$bad_flag)
+hist(veri$bad_flag, labels=TRUE, main = "Histogramı", col=c("green","red"))
 ```
 
 Temerrüt verisini ayrı bir değişkene de atayabiliriz
+
+```{r}
+op <- par(mfrow = c(2, 2))
+hist(islands)
+utils::str(hist(islands, col = "gray", labels = TRUE))
+
+hist(sqrt(islands), breaks = 12, col = "lightblue", border = "pink")
+##-- For non-equidistant breaks, counts should NOT be graphed unscaled:
+r <- hist(sqrt(islands), breaks = c(4*0:5, 10*3:5, 70, 100, 140),
+          col = "blue1")
+text(r$mids, r$density, r$counts, adj = c(.5, -.5), col = "blue3")
+sapply(r[2:3], sum)
+sum(r$density * diff(r$breaks)) # == 1
+lines(r, lty = 3, border = "purple") # -> lines.histogram(*)
+par(op)
+
+
+
+```
 
 temerrut adında bir değişkene verinin bad_flag sütununu atayın:
 
@@ -106,7 +146,6 @@ library(dplyr)
 
 # "onus_attribute" ile başlayan sütunları seç
 alt_veri <- veri %>% select(starts_with("onus_attribute")|starts_with("bad_flag"))
-
 # Sonucu göster
 print(alt_veri)
 ```
@@ -122,6 +161,10 @@ Sabit değerli veya tamamen boş sütunları kaldır ve tekrar veri_numeric değ
 veri_numeric için corelasyon matrisi hesapla ve sonucunu cor_matrix değişkenine ata.
 
 Temerrüt (bad_flag)
+
+```{r}
+veri[c(100:110,150:160),10:15]
+```
 
 ```{r}
 
@@ -156,14 +199,14 @@ ozet_veri <- veri %>% select(c("bad_flag","onus_attribute_2","onus_attribute_17"
 veriyi inceleme
 
 ```{r}
-ozet_veri
+summary(ozet_veri)
 ```
 
 Özet verimiz hariç tüm değişkenleri silelim
 
 ```{r}
-write.csv(ozet_veri, "ozet_veri.csv")
-rm(list = ls())
+#write.csv(ozet_veri, "ozet_veri.csv")
+#rm(list = ls())
 veri = read.csv("ozet_veri.csv")
 ```
 
@@ -171,9 +214,6 @@ veri = read.csv("ozet_veri.csv")
 
 ```{r}
 boxplot(veri$onus_attribute_2)
-boxplot(veri$onus_attribute_17)
-boxplot(veri$onus_attribute_23)
-boxplot(veri$onus_attribute_20)
 ```
 
 ## Histogram
@@ -188,9 +228,11 @@ hist(veri$onus_attribute_20)
 Değişken 2 için ortalama , 17 için ortanca, 23 için varyans, 20 için standart sapma hesaplayın:
 
 ```{r}
-mean(veri$onus_attribute_2)
+a <- mean(veri$onus_attribute_2)
+b = a*a
 median(veri$onus_attribute_17)
-var(veri$onus_attribute_23)
+
+d<-var(veri$onus_attribute_23)
 sd(veri$onus_attribute_20)
 ```
 
@@ -198,6 +240,6 @@ Temerrüt ile değişken 2 arasında pearson, 17 ile kendall, 23 ile spearman ko
 
 ```{r}
 cor_1 <- cor(veri$bad_flag,veri$onus_attribute_2,method = "pearson")
-cor_2 <- cor(veri$bad_flag,veri$onus_attribute_2,method = "kendall")
-cor_3 <- cor(veri$bad_flag,veri$onus_attribute_2,method = "spearman")
+#cor_2 <- cor(veri$bad_flag,veri$onus_attribute_2,method = "kendall")
+#cor_3 <- cor(veri$bad_flag,veri$onus_attribute_2,method = "spearman")
 ```

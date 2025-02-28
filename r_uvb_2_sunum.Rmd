@@ -1,0 +1,564 @@
+---
+title: "R Uygulamalı Veri Bilimi"
+author: "Ümit Mert Çağlar"
+date: "`r Sys.Date()`"
+css: style.css
+output:
+  slidy_presentation: 
+    duration: 50
+    highlight: espresso
+  beamer_presentation: 
+    toc: true
+    theme: Singapore
+    colortheme: beaver
+    fonttheme: serif
+    highlight: pygments
+  ioslides_presentation: 
+    highlight: pygments
+    smaller: true
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+options(warn=-1)
+```
+
+# 3. Büyük Veri
+
+Büyük veri setleri üzerinde gerekli manipülasyonları yaparak analiz için uygun hale getirme.
+
+# 3.1 Giriş
+
+-   Veri ön işlemleri
+
+-   dplyr paketinin temel fonksiyonları
+
+-   Veri birleştirme işlemleri
+
+-   tidyr ile veri biçim dönüşümleri
+
+-   Vaka analizi
+
+# 3.2 dplyr İşlemleri
+
+```{r}
+# Gerekli paketleri yükleme
+library(dplyr)
+```
+
+```{r}
+# Veriyi okuma (dosya yolunu kendinize göre düzenleyin)
+credit_data <- read.csv("creditcard.csv")
+
+# Veri yapısını ve özet istatistikleri kontrol etme
+glimpse(credit_data)
+summary(credit_data)
+
+```
+
+```{r}
+# Eksik veri kontrolü
+colSums(is.na(credit_data))
+```
+
+## filter
+
+```{r}
+# 1. filter(): Fraud olan işlemleri filtreleme (Class = 1)
+fraud_transactions <- credit_data %>% 
+  filter(Class == 1)
+glimpse(fraud_transactions)
+```
+
+## select
+
+```{r}
+# 2. select(): Zaman ve Tutar bilgilerini seçme
+time_amount <- credit_data %>% 
+  select(Time, Amount, Class)
+glimpse(time_amount)
+```
+
+## mutate
+
+```{r}
+# 3. mutate(): Zamanı saat cinsine çevirme
+credit_data <- credit_data %>% 
+  mutate(Time_Hours = Time/3600)
+glimpse(credit_data)
+```
+
+## summarise
+
+```{r}
+# 4. group_by() + summarise(): Sınıfa göre özet istatistikler
+transaction_summary <- credit_data %>%
+  group_by(Class) %>%
+  summarise(
+    Count = n(),
+    Avg_Amount = mean(Amount),
+    Max_Amount = max(Amount),
+    Min_Amount = min(Amount)
+  ) %>%
+  arrange(desc(Avg_Amount))
+print(transaction_summary)
+```
+
+## preprocess
+
+```{r}
+# 5. Tüm işlemleri zincirleme kullanma örneği
+processed_data <- credit_data %>%
+  filter(Amount > 0) %>%
+  select(-V25, -V26) %>% 
+  mutate(Amount_Category = ifelse(Amount > 100, "High", "Low")) %>%
+  group_by(Class, Amount_Category) %>%
+  summarise(Transaction_Count = n())
+glimpse(processed_data)
+```
+
+## sonuçlar
+
+```{r}
+# Sonuçları görüntüleme
+print(head(fraud_transactions))
+print(transaction_summary)
+print(processed_data)
+```
+
+Bu çalışmada:
+
+1.  Dolandırıcılık işlemlerini filtreleme
+2.  Önemli sütunları seçme
+3.  Zamanı saat formatına dönüştürme
+4.  Sınıflara göre tutar istatistikleri oluşturma
+5.  Çoklu işlemleri birleştirerek yeni bir veri seti oluşturma
+
+adımlarını inceledik. Fraud tespiti için kritik olan veri dengesizliğini gözlemledik. transaction_summary çıktısı dolandırıcılık oranlarını net şekilde gösterecektir.
+
+İleride yapılabilecek adımlar:
+
+-   Veri dengesizliğini giderme (SMOTE vb.)
+-   Özellik ölçeklendirme
+-   Makine öğrenmesi modellemesi
+
+# 3.3 Büyük Veri okuma
+
+```{r}
+# Gerekli kütüphaneleri yükle
+library(tidyverse)
+library(jsonlite)
+
+# Dosya yolları
+cards_data_path <- "cards_data.csv"
+users_data_path <- "users_data.csv"
+transactions_data_path <- "transactions_data.csv"
+mcc_codes_path <- "mcc_codes.json"
+fraud_labels_path <- "train_fraud_labels.json"
+
+# CSV dosyalarını oku
+cards_data <- read_csv(cards_data_path)
+users_data <- read_csv(users_data_path)
+transactions_data <- read_csv(transactions_data_path)
+
+# JSON dosyalarını oku
+mcc_codes <- fromJSON(mcc_codes_path)
+#fraud_labels <- fromJSON(fraud_labels_path) # Büyük miktarda label olduğu için bu okumayı yapmıyoruz.
+
+```
+
+```{r}
+# Verilere genel bakış
+print("cards data")
+glimpse(cards_data)
+summary(cards_data)
+
+print("users data")
+glimpse(users_data)
+summary(users_data)
+
+print("transactions data")
+glimpse(transactions_data)
+summary(transactions_data)
+
+# JSON dosyalarını incele
+print("mcc codes")
+str(mcc_codes)
+```
+
+```{r}
+print("cards_data column names:")
+colnames(cards_data)
+
+print("transactions_data column names:")
+colnames(transactions_data)
+
+print("users_data column names:")
+colnames(users_data)
+```
+
+# 3.4 Veri Birleştirme
+
+## Left Join
+
+Amaç: Tüm kullanıcıları (users_data) ve varsa kart bilgilerini (cards_data) birleştirme.
+
+```{r}
+# users_data ile cards_data'yı client_id üzerinden birleştirme
+users_with_cards <- users_data %>%
+  left_join(
+    cards_data,
+    by = c("id" = "client_id")  # users_data.id = cards_data.client_id
+  )
+
+# Sonuç: Tüm kullanıcılar (kartı olmayanlar NA ile doldurulur)
+head(users_with_cards)
+```
+
+## Right Join
+
+Amaç: Tüm işlemleri (transactions_data) ve varsa kart detaylarını (cards_data) eşleştirme.
+
+```{r}
+# transactions_data ile cards_data'yı card_id üzerinden birleştirme
+transactions_with_cards <- transactions_data %>%
+  right_join(
+    cards_data,
+    by = c("card_id" = "id")  # transactions.card_id = cards_data.id
+  )
+
+# Sonuç: Tüm kartlar (işlemi olmayan kartlar NA ile doldurulur)
+head(transactions_with_cards)
+```
+
+## Inner Join
+
+Amaç: Sadece eşleşen kart ve işlem kayıtlarını birleştirme.
+
+```{r}
+# cards_data ile transactions_data'yı tam eşleşme ile birleştirme
+valid_transactions <- cards_data %>%
+  inner_join(
+    transactions_data,
+    by = c("id" = "card_id")  # Sadece kayıtlı kartlara ait işlemler
+  )
+
+# Sonuç: Hem kartı hem işlemi olan kayıtlar
+head(valid_transactions)
+```
+
+## Full Join
+
+Amaç: Tüm kullanıcılar ve işlemler için eksiksiz bir birleşim.
+
+```{r}
+# users_data ile transactions_data'yı tüm kayıtları koruyarak birleştirme
+all_combinations <- users_data %>%
+  full_join(
+    transactions_data,
+    by = c("id" = "client_id")  # Kullanıcılar ve işlemler (eşleşmeyenler NA)
+  )
+
+# Sonuç: Hem kullanıcılar hem işlemler (eksikler NA)
+head(all_combinations)
+```
+
+# 3.5 Eksik Veri
+
+```{r}
+# Left Join sonrası NA kontrolü
+sum(is.na(users_with_cards$card_brand))
+```
+
+```{r}
+# 3 veri setini entegre etme
+#combined_data <- users_data %>%
+#  left_join(cards_data, by = c("id" = "client_id")) %>%
+#  left_join(transactions_data, by = c("id" = "client_id"))
+```
+
+```{r}
+library(ggplot2)
+users_with_cards %>%
+  ggplot(aes(x = credit_score, y = yearly_income, color = card_type)) +
+  geom_point()
+```
+
+```{r}
+
+set.seed(123)
+
+# Örnek veri oluşturma
+data <- data.frame(
+  yearly_income = runif(100, 30000, 100000),  # Yıllık gelir (30k-100k arası)
+  credit_score = rnorm(100, mean = 700, sd = 50)  # Kredi skoru (ortalama 700)
+)
+
+ggplot(data, aes(x = yearly_income, y = credit_score)) +
+  geom_point(
+    color = "#2E86C1",  # Nokta rengi
+    size = 3,           # Nokta boyutu
+    alpha = 0.7         # Şeffaflık
+  ) +
+  labs(
+    title = "Yıllık Gelir ve Kredi Skoru İlişkisi",
+    x = "Yıllık Gelir (USD)",
+    y = "Kredi Skoru"
+  ) +
+  theme_minimal() +
+  theme(
+    plot.title = element_text(hjust = 0.5, face = "bold")
+  )
+
+ggplot(data, aes(x = yearly_income, y = credit_score, color = yearly_income)) +
+  geom_point(size = 3) +
+  scale_color_gradient(low = "#F4D03F", high = "#2E86C1") +
+  labs(color = "Gelir (USD)")
+
+ggplot(data, aes(x = yearly_income, y = credit_score)) +
+  geom_point() +
+  geom_smooth(method = "lm", color = "red", se = FALSE)  # Doğrusal regresyon
+
+ggplot(data, aes(x = yearly_income, y = credit_score)) +
+  geom_point() +
+  geom_density_2d(color = "gray")  # Yoğunluk çizgileri
+
+
+```
+
+## Eksik Veri Kontrolü
+
+```{r}
+sum(is.na(data$credit_score))  # Eksik değer sayısı
+```
+
+## Korelasyon Analizi
+
+```{r}
+cor(data$yearly_income, data$credit_score)  # Korelasyon katsayısı
+```
+
+## Gelir Aralıklarına Göre Gruplama
+
+```{r}
+data %>%
+  mutate(income_group = cut(yearly_income, breaks = c(0, 50000, 100000))) %>%
+  group_by(income_group) %>%
+  summarise(avg_score = mean(credit_score))
+```
+
+## Özet
+
+-   Left Join: Ana veri (users_data) korunur, ilişkili veri (cards_data) eşleşmiyorsa NA.
+-   Right Join: Hedef veri (cards_data) korunur, işlemler eşleşmiyorsa NA.
+-   Inner Join: Sadece tam eşleşen kayıtlar alınır (veri kaybı olabilir).
+-   Full Join: Tüm veriler korunur, eşleşmeyenler NA ile doldurulur.
+
+# 4 İstatistiksel Veri Analizi
+
+# 4.1 Giriş
+
+Bu çalışmada, `creditcard.csv` isimli veri setini analiz edeceğiz. Veri setindeki değişkenlerin tanımlayıcı istatistiklerini (ortalama, medyan, varyans, standart sapma vb.) hesaplayıp yorumlayacağız.
+
+# 4.2 Veri Setinin Yüklenmesi
+
+Veri setini yüklemek için aşağıdaki kodları kullanıyoruz.
+
+```{r}
+# Gerekli kütüphanelerin yüklenmesi
+library(readr)
+library(dplyr)
+
+# Veri setinin okunması
+creditcard <- read_csv("creditcard.csv")
+
+# Veri setinin ilk birkaç satırını görüntüleme
+head(creditcard)
+```
+
+```{r}
+# Veriseti yapısının incelenmesi
+str(creditcard)
+
+# Veri setinin bir kısmının gösterilmesi
+glimpse(creditcard)
+```
+
+# 4.3 Tanımlayıcı İstatistikler
+
+Veri setindeki sayısal değişkenler için tanımlayıcı istatistikleri hesaplıyoruz.
+
+```{r}
+# Sayısal değişkenlerin özet istatistikleri
+summary_stats <- summary(creditcard)
+print(summary_stats)
+
+# Ortalama
+means <- sapply(creditcard[, sapply(creditcard, is.numeric)], mean, na.rm = TRUE)
+print("Ortalamalar:")
+print(means)
+
+# Medyan
+medians <- sapply(creditcard[, sapply(creditcard, is.numeric)], median, na.rm = TRUE)
+print("Medyanlar:")
+print(medians)
+
+# Varyans
+variances <- sapply(creditcard[, sapply(creditcard, is.numeric)], var, na.rm = TRUE)
+print("Varyanslar:")
+print(variances)
+
+# Standart Sapma
+std_devs <- sapply(creditcard[, sapply(creditcard, is.numeric)], sd, na.rm = TRUE)
+print("Standart Sapmalar:")
+print(std_devs)
+
+```
+
+# 4.4 Veri Setinin Görselleştirilmesi
+
+Veri setindeki bazı değişkenlerin dağılımlarını görselleştirelim.
+
+```{r}
+# Kutu grafiği (Boxplot)
+boxplot(creditcard$V1, main = "V1 Değişkeninin Dağılımı", ylab = "Değer")
+
+# Histogram
+hist(creditcard$V2, main = "V2 Değişkeninin Dağılımı", xlab = "Değer", col = "lightblue")
+
+```
+
+## Sonuç
+
+-   **`read_csv` Fonksiyonu**: `creditcard.csv` dosyasını okumak için `readr` paketindeki `read_csv` fonksiyonunu kullandık. Eğer veri setiniz farklı bir formatta ise (örneğin Excel), uygun fonksiyonu (`read_excel`) kullanabilirsiniz.
+-   **`sapply` Fonksiyonu**: Sayısal değişkenler üzerinde döngü yapmadan hızlıca istatistiksel hesaplamalar yapmak için `sapply` fonksiyonunu kullandık.
+-   **Görselleştirme**: Veri setindeki bazı değişkenlerin dağılımlarını kutu grafiği ve histogram ile görselleştirdik.
+
+# 4.5 Raporlanabilir Sonuçlar
+
+Bu çalışmada, `creditcard.csv` isimli veri setini analiz edeceğiz. Veri setindeki değişkenlerin tanımlayıcı istatistiklerini (ortalama, medyan, varyans, standart sapma vb.) hesaplayıp yorumlayacağız.
+
+## Veri Setinin Özellikleri
+
+Veri setini yüklemek için aşağıdaki kodları kullanıyoruz.
+
+```{r include=FALSE}
+# Gerekli kütüphanelerin yüklenmesi
+
+library(readr)
+library(dplyr)
+library(tidyr)
+library(ggplot2)
+
+# Veri setinin okunması
+creditcard <- read_csv("creditcard.csv")
+
+# Veri setinin ilk birkaç satırını görüntüleme
+head(creditcard)
+```
+
+```{r}
+# Sayısal değişkenlerin seçilmesi
+numeric_vars <- creditcard %>% select(where(is.numeric))
+
+# Tanımlayıcı istatistiklerin hesaplanması
+summary_table <- numeric_vars %>%
+  summarise(across(
+    everything(),
+    list(
+      Ortalama = ~ round(mean(.x, na.rm = TRUE), 2),
+      Medyan = ~ round(median(.x, na.rm = TRUE), 2),
+      Varyans = ~ round(var(.x, na.rm = TRUE), 2),
+      Standart_Sapma = ~ round(sd(.x, na.rm = TRUE), 2),
+      Minimum = ~ round(min(.x, na.rm = TRUE), 2),
+      Maksimum = ~ round(max(.x, na.rm = TRUE), 2)
+    ),
+    .names = "{col}_{fn}"
+  )) %>%
+  pivot_longer(
+    cols = everything(),
+    names_to = c("Değişken", "İstatistik"),
+    names_sep = "_",
+    values_to = "Değer"
+  ) %>%
+  pivot_wider(
+    names_from = "İstatistik",
+    values_from = "Değer"
+  )
+
+# Tabloyu yazdırma
+knitr::kable(summary_table, caption = "Sayısal Değişkenlerin Tanımlayıcı İstatistikleri")
+```
+
+## Tanımlayıcı İstatistikler
+
+Veri setindeki sayısal değişkenler için tanımlayıcı istatistikleri hesaplıyoruz.
+
+```{r}
+# Sayısal değişkenlerin özet istatistikleri
+summary_stats <- summary(creditcard)
+print(summary_stats)
+
+```
+
+## Veri Setinin Görselleştirilmesi
+
+Veri setindeki bazı değişkenlerin dağılımlarını görselleştirelim.
+
+```{r}
+
+# Gerekli kütüphanelerin yüklenmesi
+library(ggplot2)
+
+# Sayısal değişkenlerin seçilmesi
+numeric_vars <- creditcard %>% select(where(is.numeric))
+
+# Her bir sayısal değişken için kutu grafiği ve histogram çizimi
+for (col_name in names(numeric_vars)) {
+  # Kutu grafiği (Boxplot)
+  boxplot(
+    numeric_vars[[col_name]], 
+    main = paste(col_name, "Değişkeninin Dağılımı (Kutu Grafiği)"), 
+    ylab = "Değer", 
+    col = "lightblue"
+  )
+  
+  # Histogram
+  hist(
+    numeric_vars[[col_name]], 
+    main = paste(col_name, "Değişkeninin Dağılımı (Histogram)"), 
+    xlab = "Değer", 
+    col = "lightgreen", 
+    breaks = 20
+  )
+}
+```
+
+```{r}
+# Sayısal değişkenlerin seçilmesi
+numeric_vars <- creditcard %>% select(where(is.numeric))
+
+# Her bir sayısal değişken için ggplot ile görselleştirme
+for (col_name in names(numeric_vars)) {
+  # Kutu grafiği (Boxplot)
+  ggplot(creditcard, aes_string(x = col_name)) +
+    geom_boxplot(fill = "lightblue") +
+    ggtitle(paste(col_name, "Değişkeninin Dağılımı (Kutu Grafiği)")) +
+    ylab("Değer") +
+    theme_minimal()
+  
+  # Histogram
+  ggplot(creditcard, aes_string(x = col_name)) +
+    geom_histogram(fill = "lightgreen", color = "black", bins = 20) +
+    ggtitle(paste(col_name, "Değişkeninin Dağılımı (Histogram)")) +
+    xlab("Değer") +
+    theme_minimal()
+}
+
+```
+
+## Sonuç
+
+-   **`read_csv` Fonksiyonu**: `creditcard.csv` dosyasını okumak için `readr` paketindeki `read_csv` fonksiyonunu kullandık. Eğer veri setiniz farklı bir formatta ise (örneğin Excel), uygun fonksiyonu (`read_excel`) kullanabilirsiniz.
+-   **`sapply` Fonksiyonu**: Sayısal değişkenler üzerinde döngü yapmadan hızlıca istatistiksel hesaplamalar yapmak için `sapply` fonksiyonunu kullandık.
+-   **Görselleştirme**: Veri setindeki bazı değişkenlerin dağılımlarını kutu grafiği ve histogram ile görselleştirdik.

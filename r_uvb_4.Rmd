@@ -1,0 +1,311 @@
+---
+title: "R Uygulamalı Veri Bilimi"
+author: "Ümit Mert Çağlar"
+date: "`r Sys.Date()`"
+output:
+  slidy_presentation: default
+  beamer_presentation: default
+  ioslides_presentation: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+options(warn=-1)
+```
+
+```{r}
+
+
+
+
+
+```
+
+```{r}
+
+library(shiny)
+library(shinydashboard)
+ui <- dashboardPage(
+  dashboardHeader(title = "Dashboard Örnek 1"),
+
+  dashboardSidebar(
+    sidebarMenu(
+      menuItem("ANA PANEL 1", tabName = "p1", icon = icon("tree")),
+      menuItem("ANA PANEL 2", tabName = "p2", icon = icon("car"))
+      )
+    ),
+
+  dashboardBody(
+    tabItems(
+      tabItem("p1",
+              box(plotOutput("plot1", width=250,height = 250)),
+              box(
+                title = "Kaydırma Çubuğu",
+                sliderInput("slider", "Gözlem Sayısı:", 1, 100, 50))
+      ),
+      tabItem("p2",
+              fluidPage(
+                h1("PANEL 2"),
+                tableOutput("table") ) )
+    )
+  )
+)
+server <- function(input, output) {
+  set.seed(122)
+  histdata <- rnorm(500)
+  output$plot1 <- renderPlot({
+    data <- histdata[seq_len(input$slider)]
+    hist(data,main = "Örnek Grafik",xlab="veri", ylab="frekans")
+  })
+  output$table <- renderTable({
+    head(iris,25) })
+}
+shinyApp(ui=ui, server=server)
+
+```
+
+```{r}
+# Load required libraries
+library(shiny)
+library(ggplot2)
+library(dplyr)
+
+# Read the data from users_data.csv
+user_data <- read.csv("users_data.csv")
+
+# Define UI for the dashboard
+ui <- fluidPage(
+  titlePanel("User Data Dashboard"),
+  
+  sidebarLayout(
+    sidebarPanel(
+      selectInput("variable", "Choose a variable to visualize:",
+                  choices = c("Age" = "current_age", "Gender" = "gender", "Credit Score" = "credit_score")),
+      sliderInput("bins", "Number of bins for histogram:",
+                  min = 1, max = 50, value = 30)
+    ),
+    
+    mainPanel(
+      plotOutput("distPlot")
+    )
+  )
+)
+
+# Define server logic
+server <- function(input, output) {
+  output$distPlot <- renderPlot({
+    # Select the variable based on user input
+    var <- switch(input$variable,
+                  "current_age" = user_data$current_age,
+                  "gender" = user_data$gender,
+                  "credit_score" = user_data$credit_score)
+    
+    # Create a histogram or bar plot based on the selected variable
+    if (input$variable == "gender") {
+      ggplot(user_data, aes(x = gender, fill = gender)) +
+        geom_bar() +
+        labs(title = "Distribution of Gender", x = "Gender", y = "Count") +
+        theme_minimal()
+    } else {
+      ggplot(user_data, aes(x = var)) +
+        geom_histogram(bins = input$bins, fill = "blue", color = "black") +
+        labs(title = paste("Distribution of", input$variable),
+             x = input$variable, y = "Count") +
+        theme_minimal()
+    }
+  })
+}
+
+# Run the application
+shinyApp(ui = ui, server = server)
+```
+
+```{r}
+library(shiny)
+library(ggplot2)
+library(dplyr)
+library(DT)
+
+# Load Data
+user_data <- read.csv("users_data.csv")
+transaction_data <- read.csv("transactions_data.csv")
+
+# UI
+ui <- fluidPage(
+  titlePanel("User & Transaction Dashboard"),
+  sidebarLayout(
+    sidebarPanel(
+      selectInput("id", "Select User:", choices = unique(user_data$id))
+    ),
+    mainPanel(
+      tabsetPanel(
+        tabPanel("User Info", DTOutput("user_table")),
+        tabPanel("Transaction Summary", 
+                 plotOutput("amount_distribution"),
+                 plotOutput("mcc_distribution"),
+                 plotOutput("use_chip_bar"),
+                 plotOutput("merchant_amount"))
+      )
+    )
+  )
+)
+
+# Server
+server <- function(input, output) {
+  
+  # Filtered user info
+  output$user_table <- renderDT({
+    user_data %>% filter(id == input$id)
+  })
+  
+  # Amount Distribution
+  output$amount_distribution <- renderPlot({
+    ggplot(transaction_data, aes(x = amount)) +
+      geom_histogram(bins = 30, fill = "blue", alpha = 0.7) +
+      labs(title = "Transaction Amount Distribution", x = "Amount", y = "Count")
+  })
+  
+  # MCC Distribution
+  output$mcc_distribution <- renderPlot({
+    ggplot(transaction_data, aes(x = factor(mcc))) +
+      geom_bar(fill = "green", alpha = 0.7) +
+      labs(title = "MCC Distribution", x = "MCC", y = "Count") +
+      theme(axis.text.x = element_text(angle = 90, hjust = 1))
+  })
+  
+  # Use Chip Distribution
+  output$use_chip_bar <- renderPlot({
+    ggplot(transaction_data, aes(x = factor(use_chip))) +
+      geom_bar(fill = "red", alpha = 0.7) +
+      labs(title = "Use Chip Transactions", x = "Use Chip", y = "Count")
+  })
+  
+  # Amount Per Merchant
+  output$merchant_amount <- renderPlot({
+    ggplot(transaction_data, aes(x = factor(merchant_id), y = amount)) +
+      geom_col(fill = "purple", alpha = 0.7) +
+      labs(title = "Total Amount Per Merchant", x = "Merchant ID", y = "Total Amount") +
+      theme(axis.text.x = element_text(angle = 90, hjust = 1))
+  })
+}
+
+# Run the app
+shinyApp(ui = ui, server = server)
+
+```
+
+# Raporlama ve Sonuçların Sunumu
+
+-   Analiz sonuçlarını etkili bir şekilde sunma ve raporlama
+-   R Markdown ile dinamik rapor oluşturma
+-   R Notebook kullanımı ve interaktif dokümantasyon
+-   Analiz sonuçlarının sunum teknikleri: Grafikler, tablolar ve özet raporlar
+-   Dashboard oluşturma: shiny ile temel uygulama geliştirme örnekleri
+-   Uygulama örnekleri ve vaka çalışmalarının değerlendirilmesi
+
+# 6.1 Analiz sonuçlarını sunma ve raporlama
+
+Temel Prensipler:
+
+1\. Hedef kitleye uygun dil ve detay seviyesi
+
+1\. Görselleştirmenin önemi ve veri hikayeciliği
+
+1\. Tekrarlanabilir raporlama (Reproducible Research)
+
+Rapor Yapısı:
+
+1\. Yönetici özeti, giriş, amaç, yöntem, sonuçlar, öneriler
+
+1\. Özet tablolar ve anahtar metriklerin vurgulanması
+
+# 6.2 R Markdown ile dinamik raporlama
+
+R Markdown Temelleri:
+
+1.  Rmd dosya yapısı (YAML başlık, kod bölümleri (chunk), markdown)
+
+2.  HTML/PDF/Word çıktı formatları
+
+Kod Entegrasyonu:
+
+1.  echo=FALSE, results='hide' gibi chunk seçenekleri
+
+2.  Dinamik tablo ve grafik ekleme
+
+# 6.3 R Notebook kullanımı ve etkileşimli dokümanlar
+
+R Notebook vs R Markdown Farkları:
+
+1.  Gerçek zamanlı önizleme
+
+2.  Interaktif widget'lar (leaflet, plotly)
+
+Paylaşım Yöntemleri:
+
+1.  RPubs,
+
+2.  GitHub,
+
+3.  RStudio Connect
+
+# 6.4 Analiz sonuçlarının sunum teknikleri
+
+Grafikler:
+
+1.  ggplot2 ile profesyonel görseller
+
+2.  Renk paletleri ve tema ayarları (theme_minimal())
+
+Tablolar:
+
+1.  kableExtra ile formatlanmış tablolar
+
+2.  DT paketi ile interaktif tablolar
+
+Özet Raporlar:
+
+1.  summarytools paketi kullanımı
+
+# 6.5 Dashboard oluşturma
+
+Temel Bileşenler:
+
+1.  UI (fluidPage(), input widgets)
+
+2.  Server mantığı (reactive())
+
+# 6.6 Uygulama örnekleri
+
+```{r}
+library(shiny)
+library(shinydashboard)
+
+ui <- dashboardPage(
+  dashboardHeader(title = "Basic dashboard"),
+  dashboardSidebar(),
+  dashboardBody(
+    # Boxes need to be put in a row (or column)
+    fluidRow(
+      box(plotOutput("plot1", height = 250)),
+
+      box(
+        title = "Controls",
+        sliderInput("slider", "Number of observations:", 1, 100, 50)
+      )
+    )
+  )
+)
+
+server <- function(input, output) {
+  set.seed(122)
+  histdata <- rnorm(500)
+
+  output$plot1 <- renderPlot({
+    data <- histdata[seq_len(input$slider)]
+    hist(data)
+  })
+}
+
+shinyApp(ui, server)
+```
